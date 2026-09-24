@@ -1,0 +1,83 @@
+const STORE_STATUS = Object.freeze({
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  TEMPORARILY_CLOSED: 'TEMPORARILY_CLOSED',
+});
+
+const PAYMENT_METHODS = Object.freeze({
+  CASH: 'CASH',
+  CARD: 'CARD',
+  ONLINE: 'ONLINE',
+  OTHER: 'OTHER',
+});
+
+const EXPENSE_CATEGORIES = Object.freeze({
+  INGREDIENTS: 'INGREDIENTS',
+  SALARY: 'SALARY',
+  RENT: 'RENT',
+  ELECTRICITY: 'ELECTRICITY',
+  GAS: 'GAS',
+  WATER: 'WATER',
+  MARKETING: 'MARKETING',
+  MAINTENANCE: 'MAINTENANCE',
+  EQUIPMENT: 'EQUIPMENT',
+  DELIVERY: 'DELIVERY',
+  OTHER: 'OTHER',
+});
+
+const ORDER_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  PREPARING: 'PREPARING',
+  READY: 'READY',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+});
+
+const PAYMENT_STATUS = Object.freeze({
+  UNPAID: 'UNPAID',
+  PAID: 'PAID',
+  REFUNDED: 'REFUNDED',
+});
+
+const PRODUCT_CATEGORIES = Object.freeze({
+  CHICKEN: 'CHICKEN',
+  SIDES: 'SIDES',
+  DRINKS: 'DRINKS',
+  COMBOS: 'COMBOS',
+  DESSERTS: 'DESSERTS',
+  OTHER: 'OTHER',
+});
+
+const DATE_RANGES = Object.freeze({
+  LAST_7_DAYS: '7d',
+  LAST_30_DAYS: '30d',
+  LAST_3_MONTHS: '3m',
+  LAST_6_MONTHS: '6m',
+  THIS_YEAR: 'ytd',
+  CUSTOM: 'custom',
+});
+
+const GROUP_BY = Object.freeze({
+  DAY: 'day',
+  WEEK: 'week',
+  MONTH: 'month',
+  QUARTER: 'quarter',
+  YEAR: 'year',
+});
+
+const TRANSACTION_TYPE = Object.freeze({
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE',
+});
+
+module.exports = {
+  STORE_STATUS,
+  PAYMENT_METHODS,
+  EXPENSE_CATEGORIES,
+  ORDER_STATUS,
+  PAYMENT_STATUS,
+  PRODUCT_CATEGORIES,
+  DATE_RANGES,
+  GROUP_BY,
+  TRANSACTION_TYPE,
+};
