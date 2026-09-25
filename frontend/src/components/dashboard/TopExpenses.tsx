@@ -7,10 +7,10 @@ export function TopExpenses({ rows }: { rows: DashboardOverview['topExpenses'] }
       <h3 className="mb-4 text-lg font-normal">Top Expenses</h3>
       <div className="space-y-3">
         {rows.map((row) => (
-          <div key={row.id} className="flex items-center justify-between gap-3 border-b border-slate-50 pb-3 last:border-0">
+          <div key={row.id} className="flex items-center justify-between gap-3 border-b border-white/5 pb-3 last:border-0">
             <div>
               <p className="font-medium">{row.title}</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-400">
                 {row.category} · {row.store} · {formatDate(row.date)}
               </p>
             </div>

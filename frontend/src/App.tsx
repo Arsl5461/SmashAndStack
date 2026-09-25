@@ -6,7 +6,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppRoutes />
-      <Toaster position="top-right" richColors />
+      <Toaster position="top-right" richColors theme="dark" />
     </BrowserRouter>
   );
 }

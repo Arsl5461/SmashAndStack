@@ -21,7 +21,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/45 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-[2px]"
       onClick={onClose}
     >
       <div
@@ -33,14 +33,14 @@ export function Modal({
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h3 id="modal-title" className="text-2xl font-normal tracking-tight text-brand-red">
+            <h3 id="modal-title" className="text-2xl font-medium tracking-tight text-ink-900">
               {title}
             </h3>
-            {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
+            {description ? <p className="mt-1 text-sm text-slate-400">{description}</p> : null}
           </div>
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border-2 border-brand-blue text-brand-blue transition hover:bg-brand-blue hover:text-white"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/15 text-slate-400 transition hover:border-white/25 hover:bg-white/5 hover:text-white"
             onClick={onClose}
             aria-label="Close"
           >

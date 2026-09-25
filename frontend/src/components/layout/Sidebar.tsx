@@ -78,16 +78,16 @@ export function Sidebar({
     >
       <aside
         className={cn(
-          'relative flex h-full flex-col overflow-hidden border-r border-ink-900/10 bg-white text-ink-900 transition-all duration-300',
+          'relative flex h-full flex-col overflow-hidden border-r border-white/10 bg-surface text-ink-900 transition-all duration-300',
           collapsed ? 'w-[88px]' : 'w-[268px]'
         )}
       >
-        <div className="flex items-center gap-3 bg-brand-red px-4 py-4 text-white">
+        <div className="flex items-center gap-3 border-b border-white/10 px-4 py-4">
           <img src={logo} alt="Smash & Stack" className="h-12 w-12 rounded-md bg-white object-contain p-0.5" />
           {!collapsed ? (
             <div>
-              <p className="text-lg font-normal leading-none">Smash & Stack</p>
-              <p className="mt-1 text-[11px] font-normal text-white/80">Burgers N More</p>
+              <p className="text-lg font-medium leading-none">Smash & Stack</p>
+              <p className="mt-1 text-[11px] font-normal text-slate-400">Burgers N More</p>
             </div>
           ) : null}
         </div>
@@ -103,7 +103,7 @@ export function Sidebar({
               return (
                 <div key={group.label}>
                   {!collapsed ? (
-                    <p className="mb-2 px-3 text-[11px] font-normal text-brand-blue">
+                    <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wider text-slate-500">
                       {group.label}
                     </p>
                   ) : null}
@@ -115,8 +115,8 @@ export function Sidebar({
                         end={item.to === '/'}
                         className={({ isActive }) =>
                           cn(
-                            'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-normal text-ink-800/70 transition hover:bg-cream-50 hover:text-ink-900',
-                            isActive && 'bg-cream-50 text-brand-red shadow-[inset_4px_0_0_0_#2F6BFF]'
+                            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-normal text-slate-400 transition hover:bg-white/5 hover:text-ink-900',
+                            isActive && 'bg-brand-red/15 text-white shadow-[inset_3px_0_0_0_#E31B23]'
                           )
                         }
                       >
@@ -138,7 +138,7 @@ export function Sidebar({
           onClick={onToggle}
           aria-label={collapsed ? 'Open sidebar' : 'Close sidebar'}
           title={collapsed ? 'Open sidebar' : 'Close sidebar'}
-          className="absolute -right-3 top-[92px] z-40 flex h-8 w-8 items-center justify-center rounded-full border-2 border-brand-blue bg-white text-brand-blue shadow-md transition hover:bg-brand-blue hover:text-white"
+          className="absolute -right-3 top-[92px] z-40 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-surface-raised text-ink-800 shadow-md transition hover:border-brand-red/40 hover:bg-brand-red hover:text-white"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>

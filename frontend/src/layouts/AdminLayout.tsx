@@ -10,7 +10,7 @@ export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-cream-50">
+    <div className="flex min-h-screen bg-cream-50 text-ink-900">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} />
       <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">

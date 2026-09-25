@@ -39,7 +39,7 @@ export function TenderTypesTable({ report }: { report: TenderReport }) {
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-white text-slate-500">
+            <tr className="border-b border-white/10 bg-surface-raised text-slate-400">
               <th className="px-5 py-3 text-left font-normal">Tender Types</th>
               <th className="px-5 py-3 text-right font-normal">
                 <span className="inline-flex items-center justify-end gap-1.5">
@@ -64,7 +64,7 @@ export function TenderTypesTable({ report }: { report: TenderReport }) {
           <tbody>
             {report.rows.length ? (
               report.rows.map((row, index) => (
-                <tr key={row.tenderType} className={index % 2 ? 'bg-slate-50/80' : 'bg-white'}>
+                <tr key={row.tenderType} className={index % 2 ? 'bg-white/[0.03]' : 'bg-transparent'}>
                   <td className="px-5 py-3.5 font-medium text-ink-900">{row.tenderType}</td>
                   <td className="px-5 py-3.5 text-right tabular-nums">{formatCurrencyExact(row.salesTotal)}</td>
                   <td className="px-5 py-3.5 text-right tabular-nums">{formatCurrencyExact(row.refundTotal)}</td>
@@ -82,7 +82,7 @@ export function TenderTypesTable({ report }: { report: TenderReport }) {
             )}
           </tbody>
           <tfoot>
-            <tr className="border-t border-slate-200 bg-slate-50 font-normal text-ink-900">
+            <tr className="border-t border-white/10 bg-surface-raised font-medium text-ink-900">
               <td className="px-5 py-3.5">Total</td>
               <td className="px-5 py-3.5 text-right tabular-nums">{formatCurrencyExact(report.totals.salesTotal)}</td>
               <td className="px-5 py-3.5 text-right tabular-nums">{formatCurrencyExact(report.totals.refundTotal)}</td>
@@ -91,8 +91,8 @@ export function TenderTypesTable({ report }: { report: TenderReport }) {
           </tfoot>
         </table>
       </div>
-      <div className="flex justify-end border-t border-slate-100 px-5 py-3">
-        <Link className="text-sm font-normal uppercase tracking-wide text-sky-600 hover:text-sky-700" to="/sales">
+      <div className="flex justify-end border-t border-white/10 px-5 py-3">
+        <Link className="text-sm font-medium uppercase tracking-wide text-brand-red hover:text-brand-deep" to="/sales">
           Details
         </Link>
       </div>

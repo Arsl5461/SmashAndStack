@@ -38,14 +38,14 @@ export function DataTable<T extends { _id?: string; id?: string }>({
     <div className="overflow-x-auto">
       <table className="min-w-full text-left text-sm">
         <thead>
-          <tr className="bg-brand-blue text-xs font-normal text-white">
+          <tr className="border-b border-white/10 bg-surface-raised text-xs font-medium uppercase tracking-wide text-slate-400">
             {selectable ? (
               <th className="w-12 px-4 py-3">
                 <input type="checkbox" checked={allSelected} onChange={onToggleAll} aria-label="Select all" />
               </th>
             ) : null}
             {columns.map((column) => (
-              <th key={column.key} className={`px-4 py-3 font-normal ${column.className || ''}`}>
+              <th key={column.key} className={`px-4 py-3 font-medium ${column.className || ''}`}>
                 {column.header}
               </th>
             ))}
@@ -55,7 +55,7 @@ export function DataTable<T extends { _id?: string; id?: string }>({
           {rows.map((row, index) => {
             const id = rowId(row);
             return (
-              <tr key={id || index} className="border-b border-cream-100 last:border-0 hover:bg-cream-50">
+              <tr key={id || index} className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]">
                 {selectable ? (
                   <td className="px-4 py-3.5">
                     <input
@@ -67,7 +67,7 @@ export function DataTable<T extends { _id?: string; id?: string }>({
                   </td>
                 ) : null}
                 {columns.map((column) => (
-                  <td key={column.key} className={`px-4 py-3.5 align-middle ${column.className || ''}`}>
+                  <td key={column.key} className={`px-4 py-3.5 align-middle text-ink-800 ${column.className || ''}`}>
                     {column.render(row)}
                   </td>
                 ))}

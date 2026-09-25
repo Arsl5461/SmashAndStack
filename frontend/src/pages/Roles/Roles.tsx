@@ -25,7 +25,7 @@ export default function Roles() {
                     {group.permissions.map((permission: string) => {
                       const checked = role.permissions?.includes(permission);
                       return (
-                        <label key={permission} className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm">
+                        <label key={permission} className="flex items-center gap-2 rounded-xl bg-white/[0.04] px-3 py-2 text-sm">
                           <input
                             type="checkbox"
                             checked={checked}

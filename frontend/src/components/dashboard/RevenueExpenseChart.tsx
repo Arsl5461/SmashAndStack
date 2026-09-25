@@ -32,14 +32,14 @@ export function RevenueExpenseChart({
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-normal">Revenue vs Expenses</h3>
-          <p className="text-sm text-slate-500">Live aggregation across the selected store context</p>
+          <p className="text-sm text-slate-400">Live aggregation across the selected store context</p>
         </div>
         <div className="hidden items-center gap-4 text-xs font-normal sm:flex">
           <span className="flex items-center gap-1.5 text-brand-red">
             <span className="h-2 w-2 rounded-full bg-brand-red" /> Revenue
           </span>
-          <span className="flex items-center gap-1.5 text-brand-orange">
-            <span className="h-2 w-2 rounded-full bg-brand-orange" /> Expenses
+          <span className="flex items-center gap-1.5 text-brand-yellow">
+            <span className="h-2 w-2 rounded-full bg-brand-yellow" /> Expenses
           </span>
         </div>
       </div>
@@ -52,20 +52,23 @@ export function RevenueExpenseChart({
                 <stop offset="95%" stopColor="#E31B23" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="exp" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#2F6BFF" stopOpacity={0.2} />
-                <stop offset="95%" stopColor="#2F6BFF" stopOpacity={0} />
+                <stop offset="5%" stopColor="#C9A227" stopOpacity={0.2} />
+                <stop offset="95%" stopColor="#C9A227" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" vertical={false} />
-            <XAxis dataKey="label" tick={{ fontSize: 12 }} minTickGap={28} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 12 }} tickFormatter={formatAxisMoney} axisLine={false} tickLine={false} width={48} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2A3340" vertical={false} />
+            <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#8B95A5' }} minTickGap={28} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 12, fill: '#8B95A5' }} tickFormatter={formatAxisMoney} axisLine={false} tickLine={false} width={48} />
             <Tooltip
+              contentStyle={{ background: '#1B232E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}
+              labelStyle={{ color: '#E8EDF4' }}
+              itemStyle={{ color: '#C5CDD8' }}
               formatter={(value: number, name: string) => [formatCurrencyExact(value), name === 'revenue' ? 'Revenue' : 'Expenses']}
               labelFormatter={(label) => label}
             />
             <Legend formatter={(value) => (value === 'revenue' ? 'Revenue' : 'Expenses')} />
             <Area type="monotone" dataKey="revenue" stroke="#E31B23" fill="url(#rev)" strokeWidth={2.4} dot={false} />
-            <Area type="monotone" dataKey="expenses" stroke="#2F6BFF" fill="url(#exp)" strokeWidth={2.4} dot={false} />
+            <Area type="monotone" dataKey="expenses" stroke="#C9A227" fill="url(#exp)" strokeWidth={2.4} dot={false} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

@@ -39,7 +39,7 @@ export function ListingToolbar<T>({
       {onDeleteSelected ? (
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-normal text-rose-700 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm font-medium text-rose-300 disabled:cursor-not-allowed disabled:opacity-40"
           disabled={!selectedCount || deleting}
           onClick={onDeleteSelected}
         >

@@ -43,10 +43,10 @@ function initials(name = '') {
 }
 
 function roleTone(slug = '') {
-  if (slug === 'SUPER_ADMIN') return 'bg-rose-50 text-rose-700';
-  if (slug === 'MANAGER') return 'bg-orange-50 text-orange-700';
-  if (slug === 'ACCOUNTANT') return 'bg-sky-50 text-sky-700';
-  return 'bg-slate-100 text-slate-700';
+  if (slug === 'SUPER_ADMIN') return 'bg-rose-500/15 text-rose-300';
+  if (slug === 'MANAGER') return 'bg-orange-500/15 text-orange-300';
+  if (slug === 'ACCOUNTANT') return 'bg-sky-500/15 text-sky-300';
+  return 'bg-white/10 text-slate-300';
 }
 
 export default function Users() {
@@ -184,7 +184,7 @@ export default function Users() {
         {summary.map((item) => (
           <div key={item.label} className="card p-4">
             <p className="text-xs uppercase tracking-wide text-slate-400">{item.label}</p>
-            <p className="mt-2 text-2xl font-normal text-brand-red">{item.value}</p>
+            <p className="mt-2 text-2xl font-medium text-ink-900">{item.value}</p>
           </div>
         ))}
       </div>
@@ -193,13 +193,13 @@ export default function Users() {
         <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <SearchInput value={search} onChange={setSearch} placeholder="Search name or email" />
-            <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+            <div className="flex rounded-xl border border-white/10 bg-surface-raised p-1">
               {(['ALL', 'ACTIVE', 'INACTIVE'] as const).map((value) => (
                 <button
                   key={value}
                   type="button"
-                  className={`rounded-lg px-3 py-1.5 text-xs font-normal capitalize ${
-                    status === value ? 'bg-white text-ink-900 shadow-sm' : 'text-slate-500 hover:text-ink-900'
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium capitalize ${
+                    status === value ? 'bg-brand-red text-white shadow-sm' : 'text-slate-400 hover:text-ink-900'
                   }`}
                   onClick={() => setStatus(value)}
                 >
@@ -237,7 +237,7 @@ export default function Users() {
                   header: 'User',
                   render: (row: any) => (
                     <div className="flex items-center gap-3">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-brand-blue text-xs font-normal text-white">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-brand-red text-xs font-medium text-white">
                         {initials(row.name)}
                       </span>
                       <div>
@@ -267,12 +267,12 @@ export default function Users() {
                     return (
                       <div className="flex flex-wrap gap-1.5">
                         {visible.map((store: any) => (
-                          <span key={store._id} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                          <span key={store._id} className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-slate-300">
                             {store.name}
                           </span>
                         ))}
                         {extra > 0 ? (
-                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">+{extra}</span>
+                          <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-slate-400">+{extra}</span>
                         ) : null}
                       </div>
                     );
@@ -284,7 +284,7 @@ export default function Users() {
                   render: (row: any) => (
                     <span
                       className={`inline-flex rounded-full px-2.5 py-1 text-xs font-normal ${
-                        row.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                        row.isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/10 text-slate-400'
                       }`}
                     >
                       {row.isActive ? 'Active' : 'Inactive'}
@@ -306,7 +306,7 @@ export default function Users() {
                         {can(PERMISSIONS.USERS_UPDATE) ? <EditAction onClick={() => openEdit(row)} /> : null}
                         {can(PERMISSIONS.USERS_UPDATE) ? (
                           <button
-                            className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-normal text-slate-600 hover:bg-slate-50"
+                            className="rounded-lg border border-white/10 px-2.5 py-1 text-xs font-medium text-slate-300 hover:bg-white/5"
                             type="button"
                             disabled={isSelf}
                             onClick={() => updateUser({ id: row._id, data: { isActive: !row.isActive } })}
@@ -346,7 +346,7 @@ export default function Users() {
             await saveUser();
           }}
         >
-          <label className="text-sm font-medium text-slate-700">
+          <label className="text-sm font-medium text-slate-300">
             Full name
             <input
               className="soft-input mt-1.5"
@@ -356,7 +356,7 @@ export default function Users() {
               required
             />
           </label>
-          <label className="text-sm font-medium text-slate-700">
+          <label className="text-sm font-medium text-slate-300">
             Email
             <input
               className="soft-input mt-1.5"
@@ -368,7 +368,7 @@ export default function Users() {
             />
           </label>
           {!editingId ? (
-            <label className="text-sm font-medium text-slate-700">
+            <label className="text-sm font-medium text-slate-300">
               Temporary password
               <input
                 className="soft-input mt-1.5"
@@ -380,7 +380,7 @@ export default function Users() {
               />
             </label>
           ) : null}
-          <label className={`text-sm font-medium text-slate-700 ${editingId ? 'md:col-span-2' : ''}`}>
+          <label className={`text-sm font-medium text-slate-300 ${editingId ? 'md:col-span-2' : ''}`}>
             Role
             <select
               className="soft-input mt-1.5"
@@ -397,7 +397,7 @@ export default function Users() {
             </select>
           </label>
           <div className="md:col-span-2">
-            <p className="text-sm font-medium text-slate-700">Store access</p>
+            <p className="text-sm font-medium text-slate-300">Store access</p>
             <p className="mt-1 text-xs text-slate-500">Choose the branches this user can work with.</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {stores.map((store: any) => {
@@ -406,7 +406,7 @@ export default function Users() {
                   <label
                     key={store._id}
                     className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm ${
-                      checked ? 'border-brand-red/30 bg-rose-50/70' : 'border-slate-200 bg-white'
+                      checked ? 'border-brand-red/40 bg-brand-red/10' : 'border-white/10 bg-surface-raised'
                     }`}
                   >
                     <input type="checkbox" checked={checked} onChange={() => toggleStore(store._id)} />

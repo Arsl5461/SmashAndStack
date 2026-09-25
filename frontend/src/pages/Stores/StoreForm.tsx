@@ -118,7 +118,7 @@ export default function StoreForm({ mode }: { mode: 'create' | 'edit' }) {
           () => toast.error('Please fill in the required store fields')
         )}
       >
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-slate-300">
           Name <span className="text-brand-red">*</span>
           <input
             className="soft-input mt-1"
@@ -130,7 +130,7 @@ export default function StoreForm({ mode }: { mode: 'create' | 'edit' }) {
           />
           <FieldError message={errors.name?.message} />
         </label>
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-slate-300">
           Store code <span className="text-brand-red">*</span>
           <input
             className="soft-input mt-1 uppercase"
@@ -143,7 +143,7 @@ export default function StoreForm({ mode }: { mode: 'create' | 'edit' }) {
           <FieldError message={errors.storeCode?.message} />
         </label>
         {optionalFields.map((field) => (
-          <label key={field.name} className="text-sm font-medium text-slate-700">
+          <label key={field.name} className="text-sm font-medium text-slate-300">
             {field.label}
             <input
               className="soft-input mt-1"
@@ -161,7 +161,7 @@ export default function StoreForm({ mode }: { mode: 'create' | 'edit' }) {
             <FieldError message={errors[field.name]?.message} />
           </label>
         ))}
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-slate-300">
           Manager
           <select className="soft-input mt-1" {...form.register('manager')}>
             <option value="">Unassigned</option>
@@ -172,7 +172,7 @@ export default function StoreForm({ mode }: { mode: 'create' | 'edit' }) {
             ))}
           </select>
         </label>
-        <label className="text-sm font-medium text-slate-700">
+        <label className="text-sm font-medium text-slate-300">
           Status
           <select className="soft-input mt-1" {...form.register('status')}>
             <option value="ACTIVE">ACTIVE</option>

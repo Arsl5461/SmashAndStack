@@ -4,10 +4,10 @@ import { Pencil, Trash2, Eye } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const iconButton =
-  'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white transition hover:bg-slate-50';
+  'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-surface-raised transition hover:bg-white/5';
 
 export function EditAction({ to, onClick, label = 'Edit' }: { to?: string; onClick?: () => void; label?: string }) {
-  const className = cn(iconButton, 'text-slate-600 hover:border-slate-300 hover:text-ink-900');
+  const className = cn(iconButton, 'text-slate-300 hover:border-white/20 hover:text-ink-900');
   if (to) {
     return (
       <Link to={to} className={className} title={label} aria-label={label}>
@@ -26,7 +26,7 @@ export function ViewAction({ onClick, label = 'View' }: { onClick: () => void; l
   return (
     <button
       type="button"
-      className={cn(iconButton, 'text-sky-700 hover:border-sky-200 hover:bg-sky-50')}
+      className={cn(iconButton, 'text-sky-400 hover:border-sky-400/30 hover:bg-sky-400/10')}
       onClick={onClick}
       title={label}
       aria-label={label}
@@ -40,7 +40,7 @@ export function DeleteAction({ onClick, label = 'Delete' }: { onClick: () => voi
   return (
     <button
       type="button"
-      className={cn(iconButton, 'text-rose-600 hover:border-rose-200 hover:bg-rose-50')}
+      className={cn(iconButton, 'text-rose-400 hover:border-rose-400/30 hover:bg-rose-400/10')}
       onClick={onClick}
       title={label}
       aria-label={label}

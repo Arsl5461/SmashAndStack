@@ -21,7 +21,7 @@ export function RecentTransactions({ rows }: { rows: DashboardOverview['recentTr
             render: (row) => (
               <span
                 className={`rounded-full px-2.5 py-1 text-xs font-normal ${
-                  row.type === 'INCOME' ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-700'
+                  row.type === 'INCOME' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'
                 }`}
               >
                 {row.type}

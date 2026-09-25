@@ -22,7 +22,7 @@ export function StoreSelector() {
   }, [dispatch, selectedStoreId, stores, storesLoaded]);
 
   return (
-    <label className="relative flex h-[46px] min-w-[240px] items-center gap-2 rounded-md border border-white/20 bg-white px-3 text-ink-900">
+    <label className="relative flex h-[46px] min-w-[240px] items-center gap-2 rounded-lg border border-white/10 bg-surface-raised px-3 text-ink-900">
       <Store className="h-4 w-4 shrink-0 text-brand-red" />
       {!storesLoaded ? (
         <Pulse className="h-3.5 w-36" />
@@ -43,7 +43,7 @@ export function StoreSelector() {
           ))}
         </select>
       )}
-      <ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-brand-blue" />
+      <ChevronDown className="pointer-events-none absolute right-3 h-4 w-4 text-slate-400" />
     </label>
   );
 }

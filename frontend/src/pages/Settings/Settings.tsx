@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Building2, Mail, MapPin, Phone, ShieldCheck } from 'lucide-react';
+import { Building2, Eye, EyeOff, KeyRound, Mail, MapPin, Phone, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '../../components/common/PageHeader';
 import { BusyOverlay, InlineSpinner, LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useGetOrganizationQuery, useUpdateOrganizationMutation } from '../../api/usersApi';
+import { useChangePasswordMutation } from '../../api/authApi';
 import { usePermissions } from '../../hooks/usePermissions';
 import { PERMISSIONS } from '../../constants/permissions';
 import logo from '../../assets/logos/smash-and-stack.jpg';
@@ -17,10 +18,13 @@ const FIELDS = [
 ];
 
 export default function Settings() {
-  const { can } = usePermissions();
+  const { can, isSuperAdmin } = usePermissions();
   const canEdit = can(PERMISSIONS.SETTINGS_UPDATE);
   const { data, isLoading } = useGetOrganizationQuery();
   const [updateOrganization, { isLoading: saving }] = useUpdateOrganizationMutation();
+  const [changePassword, { isLoading: updatingPassword }] = useChangePasswordMutation();
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const form = useForm({ defaultValues: { name: '', email: '', phone: '', address: '' } });
   const organization = data?.data;
 
@@ -59,20 +63,20 @@ export default function Settings() {
                 <img
                   src={organization?.logo || logo}
                   alt={organization?.name || 'Organization logo'}
-                  className="h-16 w-16 rounded-2xl object-cover ring-1 ring-slate-200"
+                  className="h-16 w-16 rounded-2xl object-cover ring-1 ring-white/10"
                 />
                 <div>
-                  <p className="text-lg font-normal text-brand-red">{organization?.name || 'Organization'}</p>
+                  <p className="text-lg font-medium text-ink-900">{organization?.name || 'Organization'}</p>
                   <p className="text-sm text-slate-500">{organization?.email || 'No email on file'}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {organization?.slug ? (
-                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-normal text-slate-600">
+                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-slate-300">
                         {organization.slug}
                       </span>
                     ) : null}
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-normal ${
-                        organization?.isActive !== false ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                        organization?.isActive !== false ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/10 text-slate-400'
                       }`}
                     >
                       <ShieldCheck className="h-3.5 w-3.5" />
@@ -89,17 +93,17 @@ export default function Settings() {
 
           <div className="card p-6">
             <div className="mb-5">
-              <h2 className="text-base font-normal text-brand-red">Organization profile</h2>
+              <h2 className="text-base font-medium text-ink-900">Organization profile</h2>
               <p className="mt-1 text-sm text-slate-500">Official name and contact details for headquarters.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {FIELDS.map((field) => (
-                <label key={field.name} className={`text-sm font-medium text-slate-700 ${field.name === 'address' ? 'md:col-span-2' : ''}`}>
+                <label key={field.name} className={`text-sm font-medium text-slate-300 ${field.name === 'address' ? 'md:col-span-2' : ''}`}>
                   {field.label}
-                  <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 focus-within:border-brand-red/40 focus-within:ring-4 focus-within:ring-brand-red/10">
+                  <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/10 bg-surface-raised px-3 py-2.5 focus-within:border-brand-red/40 focus-within:ring-4 focus-within:ring-brand-red/10">
                     <field.icon className="h-4 w-4 shrink-0 text-slate-400" />
                     <input
-                      className="w-full bg-transparent text-sm text-slate-800 outline-none disabled:cursor-not-allowed disabled:opacity-70"
+                      className="w-full bg-transparent text-sm text-ink-900 outline-none disabled:cursor-not-allowed disabled:opacity-70"
                       type={field.type || 'text'}
                       placeholder={field.placeholder}
                       disabled={!canEdit}
@@ -142,7 +146,123 @@ export default function Settings() {
           </div>
         </form>
       )}
-      <BusyOverlay show={saving} label="Saving settings..." />
+
+      {isSuperAdmin ? (
+        <form
+          className="card mt-5 p-6"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            if (passwordForm.newPassword.length < 8) {
+              toast.error('New password must be at least 8 characters');
+              return;
+            }
+            if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+              toast.error('New passwords do not match');
+              return;
+            }
+            try {
+              await changePassword({
+                currentPassword: passwordForm.currentPassword,
+                newPassword: passwordForm.newPassword,
+              }).unwrap();
+              toast.success('Password updated');
+              setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            } catch (error: any) {
+              toast.error(error?.data?.message || 'Unable to update password');
+            }
+          }}
+        >
+          <div className="mb-5 flex items-start gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-red/15 text-brand-red">
+              <KeyRound className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-base font-medium text-ink-900">Super admin password</h2>
+              <p className="mt-1 text-sm text-slate-500">Update the owner login used to access this panel.</p>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <label className="text-sm font-medium text-slate-300">
+              Current password
+              <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/10 bg-surface-raised px-3 py-2.5 focus-within:border-brand-red/40 focus-within:ring-4 focus-within:ring-brand-red/10">
+                <input
+                  className="w-full bg-transparent text-sm text-ink-900 outline-none"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  value={passwordForm.currentPassword}
+                  onChange={(event) => setPasswordForm({ ...passwordForm, currentPassword: event.target.value })}
+                  required
+                />
+                <button
+                  type="button"
+                  className="shrink-0 text-slate-400 transition hover:text-brand-red"
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </label>
+            <label className="text-sm font-medium text-slate-300">
+              New password
+              <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/10 bg-surface-raised px-3 py-2.5 focus-within:border-brand-red/40 focus-within:ring-4 focus-within:ring-brand-red/10">
+                <input
+                  className="w-full bg-transparent text-sm text-ink-900 outline-none placeholder:text-slate-500"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  placeholder="At least 8 characters"
+                  value={passwordForm.newPassword}
+                  onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })}
+                  required
+                />
+                <button
+                  type="button"
+                  className="shrink-0 text-slate-400 transition hover:text-brand-red"
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </label>
+            <label className="text-sm font-medium text-slate-300">
+              Confirm new password
+              <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-white/10 bg-surface-raised px-3 py-2.5 focus-within:border-brand-red/40 focus-within:ring-4 focus-within:ring-brand-red/10">
+                <input
+                  className="w-full bg-transparent text-sm text-ink-900 outline-none"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(event) => setPasswordForm({ ...passwordForm, confirmPassword: event.target.value })}
+                  required
+                />
+                <button
+                  type="button"
+                  className="shrink-0 text-slate-400 transition hover:text-brand-red"
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </label>
+          </div>
+          <div className="mt-6 flex justify-end">
+            <button className="btn-primary" type="submit" disabled={updatingPassword}>
+              {updatingPassword ? (
+                <>
+                  <InlineSpinner className="border-white/30 border-t-white" />
+                  Updating...
+                </>
+              ) : (
+                'Update password'
+              )}
+            </button>
+          </div>
+        </form>
+      ) : null}
+
+      <BusyOverlay show={saving || updatingPassword} label={updatingPassword ? 'Updating password...' : 'Saving settings...'} />
     </div>
   );
 }

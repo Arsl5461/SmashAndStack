@@ -36,7 +36,7 @@ const emptyForm: {
 
 function RequiredLabel({ children }: { children: string }) {
   return (
-    <span className="mb-1.5 block text-sm font-medium text-slate-700">
+    <span className="mb-1.5 block text-sm font-medium text-slate-300">
       {children} <span className="text-brand-red">*</span>
     </span>
   );
@@ -124,7 +124,7 @@ export default function Expenses() {
                     row.receiptUrl ? (
                       <button
                         type="button"
-                        className="text-sm font-normal text-sky-600 hover:text-sky-700"
+                        className="text-sm font-medium text-brand-red hover:text-brand-deep"
                         onClick={() => setViewReceipt({ title: row.title, url: receiptPath(row.receiptUrl) })}
                       >
                         View
@@ -277,11 +277,11 @@ export default function Expenses() {
             />
           </label>
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-700">Receipt</span>
+            <span className="mb-1.5 block text-sm font-medium text-slate-300">Receipt</span>
             <span className="soft-input flex cursor-pointer items-center gap-2">
               <Upload className="h-4 w-4 shrink-0 text-brand-red" />
               <input
-                className="w-full bg-transparent text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1 file:text-sm file:font-medium"
+                className="w-full bg-transparent text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1 file:text-sm file:font-medium file:text-ink-900"
                 type="file"
                 accept="image/jpeg,image/png,image/webp,application/pdf"
                 onChange={(event) => setReceipt(event.target.files?.[0] || null)}
@@ -308,11 +308,11 @@ export default function Expenses() {
         {viewReceipt ? (
           <div className="space-y-3">
             {viewReceipt.url.toLowerCase().includes('.pdf') ? (
-              <iframe title="Expense receipt" className="h-[70vh] w-full rounded-xl border border-slate-200" src={viewReceipt.url} />
+              <iframe title="Expense receipt" className="h-[70vh] w-full rounded-xl border border-white/10" src={viewReceipt.url} />
             ) : (
-              <img src={viewReceipt.url} alt="Expense receipt" className="max-h-[70vh] w-full rounded-xl object-contain bg-slate-50" />
+              <img src={viewReceipt.url} alt="Expense receipt" className="max-h-[70vh] w-full rounded-xl object-contain bg-surface-raised" />
             )}
-            <a className="text-sm font-normal text-sky-600 hover:text-sky-700" href={viewReceipt.url} target="_blank" rel="noreferrer">
+            <a className="text-sm font-medium text-brand-red hover:text-brand-deep" href={viewReceipt.url} target="_blank" rel="noreferrer">
               Open in new tab
             </a>
           </div>

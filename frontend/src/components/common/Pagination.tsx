@@ -31,11 +31,11 @@ export function Pagination({
   const pages = pageWindow(page, totalPages);
 
   return (
-    <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-slate-500">
-        Showing <span className="font-normal text-ink-900">{start}</span>–
-        <span className="font-normal text-ink-900">{end}</span> of{' '}
-        <span className="font-normal text-ink-900">{total}</span>
+    <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-sm text-slate-400">
+        Showing <span className="font-medium text-ink-900">{start}</span>–
+        <span className="font-medium text-ink-900">{end}</span> of{' '}
+        <span className="font-medium text-ink-900">{total}</span>
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -67,13 +67,15 @@ export function Pagination({
           const showEllipsis = previous && value - previous > 1;
           return (
             <span key={value} className="contents">
-              {showEllipsis ? <span className="px-1 text-slate-400">…</span> : null}
+              {showEllipsis ? <span className="px-1 text-slate-500">…</span> : null}
               <button
                 type="button"
                 onClick={() => onPageChange(value)}
                 className={cn(
-                  'min-w-9 rounded-full px-3 py-2 text-sm font-normal',
-                  value === page ? 'bg-brand-blue text-white' : 'border-2 border-brand-blue bg-white text-brand-blue hover:bg-cream-50'
+                  'min-w-9 rounded-lg px-3 py-2 text-sm font-medium',
+                  value === page
+                    ? 'bg-brand-red text-white'
+                    : 'border border-white/10 bg-surface-raised text-slate-300 hover:bg-white/5'
                 )}
               >
                 {value}

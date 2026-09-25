@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 :root {
-  color: #2f6bff;
-  background: #fff8f0;
+  color-scheme: dark;
+  color: #e8edf4;
+  background: #0b0e13;
   font-family: Nunito, system-ui, sans-serif;
   font-weight: 400;
 }
@@ -18,12 +19,12 @@ h6,
 strong,
 b,
 th {
-  font-weight: 400;
+  font-weight: 500;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #c7d2fe transparent;
+  scrollbar-color: #3a4556 transparent;
 }
 
 .sidebar-scroll {
@@ -34,22 +35,26 @@ th {
   display: none;
 }
 
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='month']::-webkit-calendar-picker-indicator {
+  filter: invert(0.85);
+  cursor: pointer;
+}
+
 @layer components {
   .card {
-    @apply rounded-md border border-ink-900/10 bg-white shadow-card;
-    border-top: 3px solid #2f6bff;
+    @apply rounded-xl border border-white/10 bg-surface shadow-card;
   }
 
   .soft-input {
-    @apply w-full rounded-md border border-ink-900/15 px-3.5 py-2.5 text-sm text-ink-900 outline-none transition focus:border-brand-blue focus:bg-white focus:ring-4 focus:ring-brand-blue/15;
-    background-color: #fff8f0;
+    @apply w-full rounded-lg border border-white/10 bg-surface-raised px-3.5 py-2.5 text-sm text-ink-900 outline-none transition placeholder:text-slate-500 focus:border-brand-red/50 focus:ring-4 focus:ring-brand-red/10;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-red px-5 py-2.5 text-sm font-normal text-white shadow-sm transition hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-red px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-brand-blue bg-white px-5 py-2.5 text-sm font-normal text-brand-blue transition hover:bg-brand-blue hover:text-white;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-surface-raised px-5 py-2.5 text-sm font-medium text-ink-800 transition hover:border-white/25 hover:bg-surface-overlay hover:text-white disabled:cursor-not-allowed disabled:opacity-60;
   }
 }

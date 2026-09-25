@@ -12,6 +12,7 @@ import type { RootState } from '../app/store';
 import { PERMISSIONS } from '../constants/permissions';
 
 import Login from '../pages/Auth/Login';
+import ForgotPassword from '../pages/Auth/ForgotPassword';
 const Dashboard = lazy(() => import('../pages/Dashboard/Dashboard'));
 const StoresList = lazy(() => import('../pages/Stores/StoresList'));
 const AddStore = lazy(() => import('../pages/Stores/AddStore'));
@@ -50,6 +51,7 @@ export function AppRoutes() {
     <Routes>
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>

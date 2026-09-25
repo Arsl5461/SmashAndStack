@@ -1,14 +1,14 @@
-export function InlineSpinner({ className = 'border-cream-100 border-t-brand-blue' }: { className?: string }) {
+export function InlineSpinner({ className = 'border-white/15 border-t-brand-red' }: { className?: string }) {
   return <span className={`inline-block h-4 w-4 animate-spin rounded-full border-2 ${className}`} />;
 }
 
 export function BusyOverlay({ show, label = 'Please wait...' }: { show: boolean; label?: string }) {
   if (!show) return null;
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-ink-900/35 backdrop-blur-[1px]">
-      <div className="flex items-center gap-3 rounded-md bg-white px-5 py-4 shadow-xl">
-        <span className="h-6 w-6 animate-spin rounded-full border-2 border-cream-100 border-t-brand-blue" />
-        <p className="text-sm font-normal text-ink-900">{label}</p>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-[1px]">
+      <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-surface-overlay px-5 py-4 shadow-xl">
+        <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/15 border-t-brand-red" />
+        <p className="text-sm font-medium text-ink-900">{label}</p>
       </div>
     </div>
   );
@@ -17,20 +17,20 @@ export function BusyOverlay({ show, label = 'Please wait...' }: { show: boolean;
 export function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center py-16">
-      <div className="h-10 w-10 animate-spin rounded-full border-2 border-cream-100 border-t-brand-blue" />
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/15 border-t-brand-red" />
     </div>
   );
 }
 
 export function Pulse({ className = '' }: { className?: string }) {
-  return <span className={`block animate-pulse rounded-md bg-slate-200 ${className}`} />;
+  return <span className={`block animate-pulse rounded-md bg-white/10 ${className}`} />;
 }
 
 export function SkeletonGrid({ count = 4 }: { count?: number }) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="card h-32 animate-pulse bg-slate-100" />
+        <div key={index} className="card h-32 animate-pulse bg-surface-raised" />
       ))}
     </div>
   );
@@ -45,8 +45,8 @@ export function PageSkeleton() {
       </div>
       <SkeletonGrid count={4} />
       <div className="grid gap-5 xl:grid-cols-3">
-        <div className="card h-72 animate-pulse bg-slate-100 xl:col-span-2" />
-        <div className="card h-72 animate-pulse bg-slate-100" />
+        <div className="card h-72 animate-pulse bg-surface-raised xl:col-span-2" />
+        <div className="card h-72 animate-pulse bg-surface-raised" />
       </div>
     </div>
   );
@@ -73,7 +73,7 @@ export function SidebarNavSkeleton({ collapsed }: { collapsed: boolean }) {
 
 export function ErrorState({ message }: { message?: string }) {
   return (
-    <div className="rounded-md border border-red-100 bg-red-50 px-4 py-6 text-sm text-red-700">
+    <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-6 text-sm text-rose-300">
       {message || 'Something went wrong while loading this view.'}
     </div>
   );

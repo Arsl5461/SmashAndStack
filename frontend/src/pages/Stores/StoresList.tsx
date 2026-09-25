@@ -113,7 +113,7 @@ export default function StoresList() {
               key: 'status',
               header: 'Status',
               render: (row: any) => (
-                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-normal text-emerald-700">{row.status}</span>
+                <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-400">{row.status}</span>
               ),
             },
             {

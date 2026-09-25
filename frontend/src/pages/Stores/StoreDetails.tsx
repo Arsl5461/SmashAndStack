@@ -35,9 +35,9 @@ export default function StoreDetails() {
         }
       />
       <div className="mb-5 flex flex-wrap gap-2 text-sm">
-        <span className="rounded-full bg-emerald-50 px-3 py-1 font-normal text-emerald-700">{store.status}</span>
-        <span className="rounded-full bg-white px-3 py-1 shadow-sm">Opened {formatDate(store.openingDate)}</span>
-        <span className="rounded-full bg-white px-3 py-1 shadow-sm">Manager {store.manager?.name || 'Unassigned'}</span>
+        <span className="rounded-full bg-emerald-500/15 px-3 py-1 font-medium text-emerald-400">{store.status}</span>
+        <span className="rounded-full bg-surface-raised px-3 py-1 text-slate-300">Opened {formatDate(store.openingDate)}</span>
+        <span className="rounded-full bg-surface-raised px-3 py-1 text-slate-300">Manager {store.manager?.name || 'Unassigned'}</span>
       </div>
       {overview.data?.data ? (
         <div className="space-y-5">
@@ -50,7 +50,7 @@ export default function StoreDetails() {
           <h3 className="mb-3 text-lg font-normal">Assigned users</h3>
           <div className="space-y-2">
             {(users.data?.data || []).map((user: any) => (
-              <div key={user._id} className="flex justify-between rounded-xl bg-slate-50 px-3 py-2 text-sm">
+              <div key={user._id} className="flex justify-between rounded-xl bg-white/[0.04] px-3 py-2 text-sm">
                 <span>{user.name}</span>
                 <span className="text-slate-500">{user.roleId?.name}</span>
               </div>

@@ -164,7 +164,7 @@ export function exportIncomeExpenseStatementPdf(statement: IncomeExpenseStatemen
         <style>
           @page { size: letter; margin: 0.55in 0.5in 0.7in; }
           * { box-sizing: border-box; }
-          body { font-family: "Segoe UI", Arial, sans-serif; color: #2F6BFF; margin: 0; }
+          body { font-family: "Segoe UI", Arial, sans-serif; color: #141A22; margin: 0; }
           .header { background: #E31B23; color: #fff; padding: 18px 20px 16px; }
           .header p { margin: 0; }
           .brand { font-size: 22px; font-weight: 800; letter-spacing: 0.04em; }
@@ -179,19 +179,19 @@ export function exportIncomeExpenseStatementPdf(statement: IncomeExpenseStatemen
           .kpi span { display: block; font-size: 10px; letter-spacing: 0.08em; color: #6b7280; font-weight: 700; }
           .kpi strong { display: block; margin-top: 6px; font-size: 20px; }
           .ratios { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0 16px; }
-          .ratio { background: #2F6BFF; color: #fff; padding: 10px 12px; }
+          .ratio { background: #141A22; color: #fff; padding: 10px 12px; }
           .ratio span { display: block; font-size: 10px; letter-spacing: 0.08em; color: #d1d5db; }
           .ratio strong { display: block; margin-top: 4px; font-size: 18px; }
           .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
           table { width: 100%; border-collapse: collapse; font-size: 11px; }
-          th { background: #2F6BFF; color: #fff; text-align: left; padding: 7px 8px; font-size: 10px; letter-spacing: 0.04em; }
+          th { background: #141A22; color: #fff; text-align: left; padding: 7px 8px; font-size: 10px; letter-spacing: 0.04em; }
           td { border-bottom: 1px solid #e5e7eb; padding: 6px 8px; }
           .alt td { background: #f8fafc; }
           .total td { font-weight: 700; background: #f3f4f6; }
           .num { text-align: right; white-space: nowrap; }
-          .result { margin-top: 14px; background: #2F6BFF; color: #fff; padding: 10px 12px; font-size: 12px; display: flex; justify-content: space-between; gap: 12px; }
+          .result { margin-top: 14px; background: #141A22; color: #fff; padding: 10px 12px; font-size: 12px; display: flex; justify-content: space-between; gap: 12px; }
           .note { font-size: 10px; color: #6b7280; line-height: 1.45; margin-top: 12px; }
-          .category-bar { display: flex; justify-content: space-between; gap: 12px; background: #2F6BFF; color: #fff; padding: 8px 10px; font-size: 11px; margin-top: 14px; }
+          .category-bar { display: flex; justify-content: space-between; gap: 12px; background: #141A22; color: #fff; padding: 8px 10px; font-size: 11px; margin-top: 14px; }
           .block { break-inside: avoid; }
           .footer { position: running(footer); }
           @media print {

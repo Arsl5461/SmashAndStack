@@ -101,7 +101,7 @@ export default function PaymentMethods() {
                   render: (row: any) => (
                     <span
                       className={`inline-flex rounded-full px-2.5 py-1 text-xs font-normal ${
-                        row.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                        row.isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/10 text-slate-400'
                       }`}
                     >
                       {row.isActive ? 'Active' : 'Inactive'}
@@ -155,7 +155,7 @@ export default function PaymentMethods() {
             }
           }}
         >
-          <label className="block text-sm font-medium text-slate-700">
+          <label className="block text-sm font-medium text-slate-300">
             Method name
             <input
               className="soft-input mt-1.5"
@@ -165,7 +165,7 @@ export default function PaymentMethods() {
               required
             />
           </label>
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
             <input
               type="checkbox"
               checked={form.isActive}

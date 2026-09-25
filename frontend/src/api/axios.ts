@@ -45,7 +45,9 @@ axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry && !original.url?.includes('/auth/login')) {
+    const publicAuth = ['/auth/login', '/auth/forgot-password', '/auth/verify-otp', '/auth/reset-password'];
+    const isPublicAuth = publicAuth.some((path) => String(original.url || '').includes(path));
+    if (error.response?.status === 401 && !original._retry && !isPublicAuth) {
       original._retry = true;
       try {
         refreshPromise = refreshPromise || refreshAccessToken();

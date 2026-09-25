@@ -66,7 +66,7 @@ export default function Dashboard() {
                     setEndDate('');
                   }}
                   className={`rounded-full px-3 py-2 text-sm font-normal ${
-                    range === item.id ? 'bg-brand-red text-white' : 'border-2 border-brand-blue bg-white text-brand-blue'
+                    range === item.id ? 'bg-brand-red text-white' : 'border border-white/15 bg-surface-raised text-slate-300 hover:bg-white/5'
                   }`}
                 >
                   {item.label}

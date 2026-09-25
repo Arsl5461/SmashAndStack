@@ -157,7 +157,7 @@ function printHtmlDocument(title: string, body: string) {
       <head>
         <title>${escapeXml(title)}</title>
         <style>
-          body { font-family: Inter, Arial, sans-serif; padding: 28px; color: #2F6BFF; }
+          body { font-family: Inter, Arial, sans-serif; padding: 28px; color: #141A22; }
           .brand { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #E31B23; font-weight: 700; margin: 0 0 6px; }
           h1 { font-size: 22px; margin: 0 0 6px; }
           h2 { font-size: 15px; margin: 22px 0 8px; }
