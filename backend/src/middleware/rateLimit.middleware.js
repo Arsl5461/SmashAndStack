@@ -25,7 +25,20 @@ const authLimiter = rateLimit({
   },
 });
 
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Too many password reset attempts, please try again later',
+    errors: [],
+  },
+});
+
 module.exports = {
   apiLimiter,
   authLimiter,
+  otpLimiter,
 };

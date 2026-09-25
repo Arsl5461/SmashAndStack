@@ -14,6 +14,20 @@ async function findByEmail(email) {
     .populate(storePopulate);
 }
 
+async function findByEmailForReset(email) {
+  return User.findOne({ email: email.toLowerCase() }).select(
+    '+password +passwordResetTokenHash +passwordResetExpires +passwordResetSentAt +passwordResetAttempts'
+  );
+}
+
+async function findByIdWithPassword(id) {
+  return User.findById(id).select('+password');
+}
+
+async function savePasswordReset(userId, payload) {
+  return User.findByIdAndUpdate(userId, payload, { new: true });
+}
+
 async function findByIdForAuth(id) {
   return User.findById(id)
     .select('+refreshTokenHash')
@@ -36,8 +50,11 @@ async function compareRefreshHash(token, hash) {
 
 module.exports = {
   findByEmail,
+  findByEmailForReset,
+  findByIdWithPassword,
   findByIdForAuth,
   saveRefreshToken,
+  savePasswordReset,
   clearRefreshToken,
   compareRefreshHash,
 };

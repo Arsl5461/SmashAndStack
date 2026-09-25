@@ -41,9 +41,33 @@ const me = asyncHandler(async (req, res) => {
   return ApiResponse.success(res, { message: 'Profile fetched successfully', data: user });
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  const result = await authService.forgotPassword(req.body);
+  return ApiResponse.success(res, { message: result.message, data: {} });
+});
+
+const verifyOtp = asyncHandler(async (req, res) => {
+  const data = await authService.verifyOtp(req.body);
+  return ApiResponse.success(res, { message: 'Verification code confirmed', data });
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  await authService.resetPasswordWithOtp(req.body);
+  return ApiResponse.success(res, { message: 'Password updated successfully', data: {} });
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+  await authService.changePassword(req.auth.userId, req.body);
+  return ApiResponse.success(res, { message: 'Password updated successfully', data: {} });
+});
+
 module.exports = {
   login,
   refresh,
   logout,
   me,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
+  changePassword,
 };
