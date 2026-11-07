@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { Calendar, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchInput } from '../../components/common/SearchInput';
 import { DataTable } from '../../components/common/DataTable';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { BusyOverlay, InlineSpinner, LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { Modal } from '../../components/common/Modal';
 import { useBulkDeleteSalesMutation, useCreateSaleMutation, useGetSalesQuery } from '../../api/salesApi';
 import { useGetPaymentMethodsQuery } from '../../api/paymentMethodsApi';
 import { useGetSaleCategoriesQuery } from '../../api/saleCategoriesApi';
@@ -13,14 +15,46 @@ import { useListParams } from '../../hooks/useListParams';
 import { formatCurrencyExact, formatDate } from '../../utils/cn';
 import { clearZeroOnFocus, parseNumericInput, type NumericField } from '../../utils/numberInput';
 import { Pagination } from '../../components/common/Pagination';
-import { DeleteAction, TableActions } from '../../components/common/TableActions';
+import { DeleteAction, TableActions, ViewAction } from '../../components/common/TableActions';
 import { ListingToolbar } from '../../components/common/ListingToolbar';
 import { useRowSelection } from '../../hooks/useRowSelection';
 import type { ExportColumn } from '../../utils/export';
 
+const today = () => new Date().toISOString().slice(0, 10);
+
+const emptyForm: {
+  storeId: string;
+  category: string;
+  saleDate: string;
+  amount: NumericField;
+  paymentMethod: string;
+} = {
+  storeId: '',
+  category: '',
+  saleDate: today(),
+  amount: '',
+  paymentMethod: '',
+};
+
+function RequiredLabel({ children }: { children: string }) {
+  return (
+    <span className="mb-1.5 block text-sm font-medium text-slate-300">
+      {children} <span className="text-brand-red">*</span>
+    </span>
+  );
+}
+
+function attachmentPath(url?: string) {
+  if (!url) return '';
+  const index = url.indexOf('/uploads/');
+  return index >= 0 ? url.slice(index) : url;
+}
+
 export default function Sales() {
   const [open, setOpen] = useState(false);
   const [deleteIds, setDeleteIds] = useState<string[]>([]);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [viewAttachment, setViewAttachment] = useState<{ title: string; url: string } | null>(null);
   const { selectedStoreId, stores } = useStoreContext();
   const { page, setPage, limit, setLimit, search, setSearch, query } = useListParams(20, [selectedStoreId]);
   const { data, isLoading } = useGetSalesQuery({ ...query, storeId: selectedStoreId || undefined });
@@ -29,11 +63,11 @@ export default function Sales() {
   const exportRows = selection.selected.length ? rows.filter((row: any) => selection.selected.includes(row._id)) : rows;
   const exportColumns: ExportColumn<any>[] = [
     { header: 'Store', value: (row) => row.storeId?.name || '' },
-    { header: 'Customer', value: (row) => row.customerName },
     { header: 'Category', value: (row) => row.category || '' },
     { header: 'Amount', value: (row) => row.totalAmount },
     { header: 'Payment', value: (row) => row.paymentMethod },
     { header: 'Date', value: (row) => formatDate(row.saleDate) },
+    { header: 'Attachment', value: (row) => (row.attachmentUrl ? 'Yes' : 'No') },
   ];
   const methodsQuery = useGetPaymentMethodsQuery({ limit: 100, status: 'ACTIVE', sortBy: 'name', sortOrder: 'asc' });
   const categoriesQuery = useGetSaleCategoriesQuery({ limit: 100, status: 'ACTIVE', sortBy: 'name', sortOrder: 'asc' });
@@ -41,13 +75,13 @@ export default function Sales() {
   const saleCategories = categoriesQuery.data?.data || [];
   const [createSale, { isLoading: creating }] = useCreateSaleMutation();
   const [bulkDeleteSales, { isLoading: deleting }] = useBulkDeleteSalesMutation();
-  const [form, setForm] = useState<{
-    storeId: string;
-    amount: NumericField;
-    paymentMethod: string;
-    category: string;
-    customerName: string;
-  }>({ storeId: '', amount: '', paymentMethod: '', category: '', customerName: 'Walk-in Guest' });
+  const [form, setForm] = useState(emptyForm);
+
+  const closeModal = () => {
+    setOpen(false);
+    setForm({ ...emptyForm, saleDate: today() });
+    setAttachment(null);
+  };
 
   return (
     <div>
@@ -55,14 +89,26 @@ export default function Sales() {
         title="Sales Income"
         subtitle="Record and review store-level sales."
         actions={
-          <button className="btn-primary" type="button" onClick={() => setOpen(true)}>
+          <button
+            className="btn-primary"
+            type="button"
+            onClick={() => {
+              setForm({
+                ...emptyForm,
+                storeId: selectedStoreId || '',
+                saleDate: today(),
+              });
+              setAttachment(null);
+              setOpen(true);
+            }}
+          >
             Add Sale
           </button>
         }
       />
       <div className="card p-4">
         <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <SearchInput value={search} onChange={setSearch} placeholder="Search customer or reference" />
+          <SearchInput value={search} onChange={setSearch} placeholder="Search category or reference" />
           <ListingToolbar
             title="Sales Income"
             fileName="sns-sales"
@@ -73,7 +119,9 @@ export default function Sales() {
             onDeleteSelected={() => setDeleteIds(selection.selected)}
           />
         </div>
-        {isLoading ? <LoadingSpinner /> : (
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
           <div className="mt-4">
             <DataTable
               rows={rows}
@@ -83,7 +131,6 @@ export default function Sales() {
               onToggleAll={selection.toggleAll}
               columns={[
                 { key: 'store', header: 'Store', render: (row: any) => row.storeId?.name },
-                { key: 'customer', header: 'Customer', render: (row: any) => row.customerName },
                 { key: 'category', header: 'Category', render: (row: any) => row.category || '—' },
                 { key: 'amount', header: 'Amount', render: (row: any) => formatCurrencyExact(row.totalAmount) },
                 { key: 'method', header: 'Payment', render: (row: any) => row.paymentMethod },
@@ -93,6 +140,17 @@ export default function Sales() {
                   header: '',
                   render: (row: any) => (
                     <TableActions>
+                      {row.attachmentUrl ? (
+                        <ViewAction
+                          label="View attachment"
+                          onClick={() =>
+                            setViewAttachment({
+                              title: row.category || 'Sale',
+                              url: attachmentPath(row.attachmentUrl),
+                            })
+                          }
+                        />
+                      ) : null}
                       <DeleteAction onClick={() => setDeleteIds([row._id])} />
                     </TableActions>
                   ),
@@ -104,49 +162,87 @@ export default function Sales() {
         )}
       </div>
 
-      {open ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4">
-          <form
-            className="card w-full max-w-lg space-y-3 p-6"
-            onSubmit={async (event) => {
-              event.preventDefault();
-              const storeId = form.storeId || selectedStoreId || stores[0]?._id;
-              if (!storeId || !form.paymentMethod || !form.category || !form.amount) {
-                toast.error('Please fill in store, category, amount, and payment method');
-                return;
-              }
-              try {
-                await createSale({
-                  storeId,
-                  customerName: form.customerName,
-                  paymentMethod: form.paymentMethod,
-                  category: form.category,
-                  totalAmount: Number(form.amount),
-                }).unwrap();
-                toast.success('Sale recorded');
-                setOpen(false);
-                setForm({ storeId: '', amount: '', paymentMethod: '', category: '', customerName: 'Walk-in Guest' });
-              } catch (error: any) {
-                toast.error(error?.data?.message || 'Unable to save sale');
-              }
-            }}
-          >
-            <h3 className="text-lg font-normal">New sale</h3>
-            <select className="soft-input" value={form.storeId} onChange={(e) => setForm({ ...form, storeId: e.target.value })} required>
+      <Modal
+        open={open}
+        title="New sale"
+        description="Choose a category from Sale Category, then save the sale."
+        onClose={closeModal}
+      >
+        <form
+          className="space-y-3"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            const storeId = form.storeId || selectedStoreId || stores[0]?._id;
+            if (!storeId || !form.category || !form.saleDate || !form.paymentMethod || !form.amount) {
+              toast.error('Please fill in all required fields');
+              return;
+            }
+            try {
+              const payload = new FormData();
+              payload.append('storeId', String(storeId));
+              payload.append('category', form.category);
+              payload.append('saleDate', form.saleDate);
+              payload.append('paymentMethod', form.paymentMethod);
+              payload.append('totalAmount', String(form.amount));
+              if (attachment) payload.append('attachment', attachment);
+              await createSale(payload).unwrap();
+              toast.success('Sale recorded');
+              closeModal();
+            } catch (error: any) {
+              toast.error(error?.data?.message || 'Unable to save sale');
+            }
+          }}
+        >
+          <label className="block">
+            <RequiredLabel>Store</RequiredLabel>
+            <select
+              className="soft-input"
+              value={form.storeId}
+              onChange={(e) => setForm({ ...form, storeId: e.target.value })}
+              required
+            >
               <option value="">Select store</option>
               {stores.map((store) => (
-                <option key={store._id} value={store._id}>{store.name}</option>
+                <option key={store._id} value={store._id}>
+                  {store.name}
+                </option>
               ))}
             </select>
-            <select className="soft-input" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required>
-              <option value="">Select sale category</option>
+          </label>
+          <label className="block">
+            <RequiredLabel>Category</RequiredLabel>
+            <select
+              className="soft-input"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              required
+            >
+              <option value="">Select category</option>
               {saleCategories.map((item: any) => (
-                <option key={item._id} value={item.name}>{item.name}</option>
+                <option key={item._id} value={item.name}>
+                  {item.name}
+                </option>
               ))}
             </select>
-            {!saleCategories.length ? (
-              <p className="text-xs text-slate-500">Add categories from Sale Category first.</p>
-            ) : null}
+          </label>
+          {!saleCategories.length ? (
+            <p className="text-xs text-slate-500">Add categories from Sale Category first.</p>
+          ) : null}
+          <label className="block">
+            <RequiredLabel>Date</RequiredLabel>
+            <span className="soft-input flex items-center gap-2">
+              <Calendar className="h-4 w-4 shrink-0 text-brand-red" />
+              <input
+                className="w-full bg-transparent outline-none"
+                type="date"
+                value={form.saleDate}
+                onChange={(e) => setForm({ ...form, saleDate: e.target.value })}
+                required
+              />
+            </span>
+          </label>
+          <label className="block">
+            <RequiredLabel>Sale amount</RequiredLabel>
             <input
               className="soft-input"
               type="number"
@@ -158,24 +254,93 @@ export default function Sales() {
               onChange={(e) => setForm({ ...form, amount: parseNumericInput(e.target.value) })}
               required
             />
-            <select className="soft-input" value={form.paymentMethod} onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })} required>
+          </label>
+          <label className="block">
+            <RequiredLabel>Payment method</RequiredLabel>
+            <select
+              className="soft-input"
+              value={form.paymentMethod}
+              onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
+              required
+            >
               <option value="">Select payment method</option>
               {paymentMethods.map((method: any) => (
-                <option key={method._id} value={method.name}>{method.name}</option>
+                <option key={method._id} value={method.name}>
+                  {method.name}
+                </option>
               ))}
             </select>
-            {!paymentMethods.length ? (
-              <p className="text-xs text-slate-500">Add methods from Payment Method first.</p>
-            ) : null}
-            <div className="flex justify-end gap-2">
-              <button className="btn-secondary" type="button" onClick={() => setOpen(false)}>Cancel</button>
-              <button className="btn-primary" type="submit" disabled={creating || !saleCategories.length || !paymentMethods.length}>
-                {creating ? <><InlineSpinner className="border-white/30 border-t-white" /> Saving...</> : 'Save'}
-              </button>
-            </div>
-          </form>
-        </div>
-      ) : null}
+          </label>
+          {!paymentMethods.length ? (
+            <p className="text-xs text-slate-500">Add methods from Payment Method first.</p>
+          ) : null}
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-slate-300">Attachment</span>
+            <span className="soft-input flex cursor-pointer items-center gap-2">
+              <Upload className="h-4 w-4 shrink-0 text-brand-red" />
+              <input
+                className="w-full bg-transparent text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1 file:text-sm file:font-medium file:text-ink-900"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                onChange={(event) => setAttachment(event.target.files?.[0] || null)}
+              />
+            </span>
+            <p className="mt-1 text-xs text-slate-500">Optional. JPG, PNG, WEBP, or PDF up to 5 MB.</p>
+          </label>
+          <div className="flex justify-end gap-2">
+            <button className="btn-secondary" type="button" onClick={closeModal}>
+              Cancel
+            </button>
+            <button
+              className="btn-primary"
+              type="submit"
+              disabled={creating || !saleCategories.length || !paymentMethods.length}
+            >
+              {creating ? (
+                <>
+                  <InlineSpinner className="border-white/30 border-t-white" />
+                  Saving...
+                </>
+              ) : (
+                'Save'
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        open={Boolean(viewAttachment)}
+        title={viewAttachment ? `Attachment · ${viewAttachment.title}` : 'Attachment'}
+        onClose={() => setViewAttachment(null)}
+        wide
+      >
+        {viewAttachment ? (
+          <div className="space-y-3">
+            {viewAttachment.url.toLowerCase().includes('.pdf') ? (
+              <iframe
+                title="Sale attachment"
+                className="h-[70vh] w-full rounded-xl border border-white/10"
+                src={viewAttachment.url}
+              />
+            ) : (
+              <img
+                src={viewAttachment.url}
+                alt="Sale attachment"
+                className="max-h-[70vh] w-full rounded-xl bg-surface-raised object-contain"
+              />
+            )}
+            <a
+              className="text-sm font-medium text-brand-red hover:text-brand-deep"
+              href={viewAttachment.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open in new tab
+            </a>
+          </div>
+        ) : null}
+      </Modal>
 
       <BusyOverlay show={creating || deleting} label={deleting ? 'Deleting sales...' : 'Saving sale...'} />
       <ConfirmDialog

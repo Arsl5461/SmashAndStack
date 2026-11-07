@@ -9,12 +9,12 @@ const resourceApi = (name: string, tag: 'Sale' | 'Expense' | 'User') => ({
     }),
   create: (builder: any) =>
     builder.mutation({
-      query: (data: Record<string, unknown>) => ({ url: `/${name}`, method: 'POST', data }),
+      query: (data: FormData | Record<string, unknown>) => ({ url: `/${name}`, method: 'POST', data }),
       invalidatesTags: [tag, 'Dashboard', 'Report'],
     }),
   update: (builder: any) =>
     builder.mutation({
-      query: ({ id, data }: { id: string; data: Record<string, unknown> }) => ({
+      query: ({ id, data }: { id: string; data: FormData | Record<string, unknown> }) => ({
         url: `/${name}/${id}`,
         method: 'PATCH',
         data,
