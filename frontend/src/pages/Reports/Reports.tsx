@@ -87,12 +87,13 @@ export default function Reports() {
 
       {overview ? (
         <div className="space-y-5">
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {[
               ['Total Sales', statement?.totalSales ?? overview.summary.totalRevenue],
               ['Total Expenses', statement?.totalExpenses ?? overview.summary.totalExpenses],
               ['Operating Profit', statement?.operatingProfit ?? overview.summary.netProfit],
               ['Profit Margin', `${(statement?.profitMargin ?? overview.summary.profitMargin).toFixed(2)}%`],
+              ['Open borrowed', statement?.openBorrowedTotal ?? 0],
             ].map(([label, value]) => (
               <div key={label} className="card p-5">
                 <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>

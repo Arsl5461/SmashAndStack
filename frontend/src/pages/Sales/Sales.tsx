@@ -7,6 +7,7 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { BusyOverlay, InlineSpinner, LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useBulkDeleteSalesMutation, useCreateSaleMutation, useGetSalesQuery } from '../../api/salesApi';
 import { useGetPaymentMethodsQuery } from '../../api/paymentMethodsApi';
+import { useGetSaleCategoriesQuery } from '../../api/saleCategoriesApi';
 import { useStoreContext } from '../../hooks/usePermissions';
 import { useListParams } from '../../hooks/useListParams';
 import { formatCurrencyExact, formatDate } from '../../utils/cn';
@@ -29,20 +30,24 @@ export default function Sales() {
   const exportColumns: ExportColumn<any>[] = [
     { header: 'Store', value: (row) => row.storeId?.name || '' },
     { header: 'Customer', value: (row) => row.customerName },
+    { header: 'Category', value: (row) => row.category || '' },
     { header: 'Amount', value: (row) => row.totalAmount },
     { header: 'Payment', value: (row) => row.paymentMethod },
     { header: 'Date', value: (row) => formatDate(row.saleDate) },
   ];
   const methodsQuery = useGetPaymentMethodsQuery({ limit: 100, status: 'ACTIVE', sortBy: 'name', sortOrder: 'asc' });
+  const categoriesQuery = useGetSaleCategoriesQuery({ limit: 100, status: 'ACTIVE', sortBy: 'name', sortOrder: 'asc' });
   const paymentMethods = methodsQuery.data?.data || [];
+  const saleCategories = categoriesQuery.data?.data || [];
   const [createSale, { isLoading: creating }] = useCreateSaleMutation();
   const [bulkDeleteSales, { isLoading: deleting }] = useBulkDeleteSalesMutation();
   const [form, setForm] = useState<{
     storeId: string;
     amount: NumericField;
     paymentMethod: string;
+    category: string;
     customerName: string;
-  }>({ storeId: '', amount: '', paymentMethod: '', customerName: 'Walk-in Guest' });
+  }>({ storeId: '', amount: '', paymentMethod: '', category: '', customerName: 'Walk-in Guest' });
 
   return (
     <div>
@@ -79,6 +84,7 @@ export default function Sales() {
               columns={[
                 { key: 'store', header: 'Store', render: (row: any) => row.storeId?.name },
                 { key: 'customer', header: 'Customer', render: (row: any) => row.customerName },
+                { key: 'category', header: 'Category', render: (row: any) => row.category || '—' },
                 { key: 'amount', header: 'Amount', render: (row: any) => formatCurrencyExact(row.totalAmount) },
                 { key: 'method', header: 'Payment', render: (row: any) => row.paymentMethod },
                 { key: 'date', header: 'Date', render: (row: any) => formatDate(row.saleDate) },
@@ -105,8 +111,8 @@ export default function Sales() {
             onSubmit={async (event) => {
               event.preventDefault();
               const storeId = form.storeId || selectedStoreId || stores[0]?._id;
-              if (!storeId || !form.paymentMethod || !form.amount) {
-                toast.error('Please fill in store, amount, and payment method');
+              if (!storeId || !form.paymentMethod || !form.category || !form.amount) {
+                toast.error('Please fill in store, category, amount, and payment method');
                 return;
               }
               try {
@@ -114,11 +120,12 @@ export default function Sales() {
                   storeId,
                   customerName: form.customerName,
                   paymentMethod: form.paymentMethod,
+                  category: form.category,
                   totalAmount: Number(form.amount),
                 }).unwrap();
                 toast.success('Sale recorded');
                 setOpen(false);
-                setForm({ storeId: '', amount: '', paymentMethod: '', customerName: 'Walk-in Guest' });
+                setForm({ storeId: '', amount: '', paymentMethod: '', category: '', customerName: 'Walk-in Guest' });
               } catch (error: any) {
                 toast.error(error?.data?.message || 'Unable to save sale');
               }
@@ -131,6 +138,15 @@ export default function Sales() {
                 <option key={store._id} value={store._id}>{store.name}</option>
               ))}
             </select>
+            <select className="soft-input" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} required>
+              <option value="">Select sale category</option>
+              {saleCategories.map((item: any) => (
+                <option key={item._id} value={item.name}>{item.name}</option>
+              ))}
+            </select>
+            {!saleCategories.length ? (
+              <p className="text-xs text-slate-500">Add categories from Sale Category first.</p>
+            ) : null}
             <input
               className="soft-input"
               type="number"
@@ -153,7 +169,7 @@ export default function Sales() {
             ) : null}
             <div className="flex justify-end gap-2">
               <button className="btn-secondary" type="button" onClick={() => setOpen(false)}>Cancel</button>
-              <button className="btn-primary" type="submit" disabled={creating}>
+              <button className="btn-primary" type="submit" disabled={creating || !saleCategories.length || !paymentMethods.length}>
                 {creating ? <><InlineSpinner className="border-white/30 border-t-white" /> Saving...</> : 'Save'}
               </button>
             </div>

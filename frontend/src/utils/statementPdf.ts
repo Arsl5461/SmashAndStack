@@ -38,6 +38,9 @@ export type IncomeExpenseStatement = {
   revenueSources: Array<{ name: string; amount: number; percentOfSales: number; count: number }>;
   expenseCategories: StatementCategory[];
   expenseMethods: Array<{ name: string; amount: number; percentOfExpenses: number; count: number }>;
+  openBorrowedTotal?: number;
+  openBorrowedCount?: number;
+  openBorrowedItems?: Array<{ borrowedFrom: string; amount: number; borrowedDate: string; note: string }>;
 };
 
 function escapeXml(value: string | number) {
@@ -242,7 +245,11 @@ export function exportIncomeExpenseStatementPdf(statement: IncomeExpenseStatemen
             <span>Less: Total Expenses (${escapeXml(money(statement.totalExpenses))})</span>
             <span>Estimated Operating Profit ${escapeXml(money(statement.operatingProfit))}</span>
           </div>
-          <p class="note">Statement basis: Sales are shown as gross receipts by payment method. Expense categories and payment methods come from recorded expenses. Prime cost is food cost plus payroll when those categories exist. This is an internal operating statement and may require accountant adjustments for sales tax, accrual timing, depreciation, owner draws, refunds, chargebacks, or outstanding deposits.</p>
+          <div class="result" style="margin-top:8px;background:#B51218;">
+            <span>Open borrowed money</span>
+            <span>${escapeXml(money(statement.openBorrowedTotal || 0))} (${escapeXml(statement.openBorrowedCount || 0)} open)</span>
+          </div>
+          <p class="note">Statement basis: Sales are shown as gross receipts by payment method. Expense categories and payment methods come from recorded expenses. Prime cost is food cost plus payroll when those categories exist. Open borrowed money stays on this summary until marked paid and is not included in operating expenses. This is an internal operating statement and may require accountant adjustments for sales tax, accrual timing, depreciation, owner draws, refunds, chargebacks, or outstanding deposits.</p>
         </section>
 
         <section class="page">
