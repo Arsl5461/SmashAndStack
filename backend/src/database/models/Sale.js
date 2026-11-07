@@ -33,6 +33,7 @@ const saleSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    attachmentUrl: { type: String, default: '' },
     saleDate: { type: Date, required: true, default: Date.now },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },

@@ -2,6 +2,7 @@ const saleService = require('./sale.service');
 const ApiResponse = require('../../utils/ApiResponse');
 const asyncHandler = require('../../utils/asyncHandler');
 const { parseListQuery, buildMeta } = require('../../utils/pagination');
+const { publicFileUrl } = require('../../utils/storage');
 
 const list = asyncHandler(async (req, res) => {
   const query = parseListQuery(req.query);
@@ -19,12 +20,14 @@ const getById = asyncHandler(async (req, res) => {
 });
 
 const create = asyncHandler(async (req, res) => {
-  const data = await saleService.createSale(req.auth, req.body);
+  const attachmentUrl = req.file ? publicFileUrl(req, req.file.filename) : '';
+  const data = await saleService.createSale(req.auth, req.body, attachmentUrl);
   return ApiResponse.created(res, { message: 'Sale created successfully', data });
 });
 
 const update = asyncHandler(async (req, res) => {
-  const data = await saleService.updateSale(req.auth, req.params.id, req.body);
+  const attachmentUrl = req.file ? publicFileUrl(req, req.file.filename) : undefined;
+  const data = await saleService.updateSale(req.auth, req.params.id, req.body, attachmentUrl);
   return ApiResponse.success(res, { message: 'Sale updated successfully', data });
 });
 

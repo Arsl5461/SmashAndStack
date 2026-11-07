@@ -357,24 +357,32 @@ async function aggregateIncomeExpenseStatement(auth, { storeId, start, end }) {
 
   expenses.forEach((expense) => {
     const category = expense.category || 'Uncategorized';
-    const method = expense.paymentMethod || 'Unspecified';
+    const paymentLines =
+      Array.isArray(expense.paymentMethods) && expense.paymentMethods.length
+        ? expense.paymentMethods
+        : [{ method: expense.paymentMethod || 'Unspecified', amount: expense.amount }];
+    const methodLabel = paymentLines.map((row) => row.method).join(', ') || 'Unspecified';
+
     const currentCategory = categoryMap.get(category) || { name: category, amount: 0, count: 0, items: [] };
     currentCategory.amount += expense.amount;
     currentCategory.count += 1;
     currentCategory.items.push({
       date: expense.expenseDate,
       payee: expense.title,
-      paymentMethod: method,
+      paymentMethod: methodLabel,
       description: expense.description || '',
       amount: money(expense.amount),
       percentOfSales: percent(expense.amount, totalSales),
     });
     categoryMap.set(category, currentCategory);
 
-    const currentMethod = methodMap.get(method) || { name: method, amount: 0, count: 0 };
-    currentMethod.amount += expense.amount;
-    currentMethod.count += 1;
-    methodMap.set(method, currentMethod);
+    paymentLines.forEach((row) => {
+      const method = row.method || 'Unspecified';
+      const currentMethod = methodMap.get(method) || { name: method, amount: 0, count: 0 };
+      currentMethod.amount += row.amount || 0;
+      currentMethod.count += 1;
+      methodMap.set(method, currentMethod);
+    });
   });
 
   const expenseCategories = Array.from(categoryMap.values())

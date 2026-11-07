@@ -15,7 +15,7 @@ const saleFields = z.object({
   totalAmount: z.coerce.number().positive().optional(),
   paymentMethod: z.string().min(1),
   category: z.string().min(1),
-  saleDate: z.string().optional(),
+  saleDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Select a sale date'),
 });
 
 const createSaleSchema = saleFields.refine(

@@ -66,7 +66,10 @@ async function removeMany(ids, organizationId) {
 
 async function usageCount(organizationId, name) {
   const [expenses, sales, orders] = await Promise.all([
-    Expense.countDocuments({ organizationId, paymentMethod: name }),
+    Expense.countDocuments({
+      organizationId,
+      $or: [{ paymentMethod: name }, { 'paymentMethods.method': name }],
+    }),
     Sale.countDocuments({ organizationId, paymentMethod: name }),
     Order.countDocuments({ organizationId, paymentMethod: name }),
   ]);

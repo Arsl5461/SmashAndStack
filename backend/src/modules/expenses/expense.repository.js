@@ -8,18 +8,28 @@ function buildFilter(auth, query) {
     ...scopedStoreFilter(auth, query.storeId),
   };
   if (query.category) filter.category = query.category;
-  if (query.paymentMethod) filter.paymentMethod = query.paymentMethod;
   if (query.startDate || query.endDate) {
     filter.expenseDate = {};
     if (query.startDate) filter.expenseDate.$gte = new Date(query.startDate);
     if (query.endDate) filter.expenseDate.$lte = new Date(query.endDate);
   }
-  if (query.search) {
-    filter.$or = [
-      { title: { $regex: escapeRegex(query.search), $options: 'i' } },
-      { description: { $regex: escapeRegex(query.search), $options: 'i' } },
-    ];
+
+  const and = [];
+  if (query.paymentMethod) {
+    and.push({
+      $or: [{ paymentMethod: query.paymentMethod }, { 'paymentMethods.method': query.paymentMethod }],
+    });
   }
+  if (query.search) {
+    and.push({
+      $or: [
+        { title: { $regex: escapeRegex(query.search), $options: 'i' } },
+        { description: { $regex: escapeRegex(query.search), $options: 'i' } },
+        { category: { $regex: escapeRegex(query.search), $options: 'i' } },
+      ],
+    });
+  }
+  if (and.length) filter.$and = and;
   return filter;
 }
 
