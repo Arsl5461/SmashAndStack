@@ -14,6 +14,7 @@ const saleFields = z.object({
   products: z.array(productLine).optional(),
   totalAmount: z.coerce.number().positive().optional(),
   paymentMethod: z.string().min(1),
+  category: z.string().min(1),
   saleDate: z.string().optional(),
 });
 

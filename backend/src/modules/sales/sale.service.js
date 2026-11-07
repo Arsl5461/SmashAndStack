@@ -1,5 +1,6 @@
 const saleRepository = require('./sale.repository');
 const paymentMethodService = require('../paymentMethods/paymentMethod.service');
+const saleCategoryService = require('../saleCategories/saleCategory.service');
 const { NotFoundError, ValidationError } = require('../../utils/AppError');
 
 function computeLines(products = [], totalAmount) {
@@ -38,9 +39,11 @@ async function getSale(auth, id) {
 async function createSale(auth, payload) {
   const { lines, totalAmount } = computeLines(payload.products, payload.totalAmount);
   const paymentMethod = await paymentMethodService.assertActiveMethod(auth, payload.paymentMethod);
+  const category = await saleCategoryService.assertActiveCategory(auth, payload.category);
   return saleRepository.create({
     ...payload,
     paymentMethod,
+    category,
     products: lines,
     totalAmount,
     organizationId: auth.organizationId,
@@ -59,6 +62,9 @@ async function updateSale(auth, id, payload) {
   }
   if (payload.paymentMethod) {
     update.paymentMethod = await paymentMethodService.assertActiveMethod(auth, payload.paymentMethod);
+  }
+  if (payload.category) {
+    update.category = await saleCategoryService.assertActiveCategory(auth, payload.category);
   }
   if (payload.saleDate) update.saleDate = new Date(payload.saleDate);
   return saleRepository.updateById(id, auth.organizationId, update);

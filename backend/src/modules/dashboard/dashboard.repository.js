@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Sale, Expense, Order, Store, PaymentMethod } = require('../../database/models');
+const { Sale, Expense, Order, Store, PaymentMethod, MoneyBorrowed } = require('../../database/models');
 const { scopedStoreFilter } = require('../../middleware/storeAccess.middleware');
 const { dateTruncUnit } = require('../../utils/dateHelper');
 
@@ -309,7 +309,20 @@ async function aggregateIncomeExpenseStatement(auth, { storeId, start, end }) {
   const salesMatch = matchStage(auth, storeId, 'saleDate', start, end);
   const expenseMatch = matchStage(auth, storeId, 'expenseDate', start, end);
 
-  const [salesByMethod, expenses] = await Promise.all([
+  const openBorrowedMatch = {
+    organizationId: toObjectId(auth.organizationId),
+    status: 'OPEN',
+    ...scopedStoreFilter(auth, storeId),
+  };
+  if (openBorrowedMatch.storeId) {
+    if (openBorrowedMatch.storeId.$in) {
+      openBorrowedMatch.storeId = { $in: openBorrowedMatch.storeId.$in.map((id) => toObjectId(id)) };
+    } else {
+      openBorrowedMatch.storeId = toObjectId(openBorrowedMatch.storeId);
+    }
+  }
+
+  const [salesByMethod, expenses, openBorrowed] = await Promise.all([
     Sale.aggregate([
       { $match: salesMatch },
       {
@@ -322,6 +335,7 @@ async function aggregateIncomeExpenseStatement(auth, { storeId, start, end }) {
       { $sort: { amount: -1 } },
     ]),
     Expense.find(expenseMatch).sort({ category: 1, expenseDate: 1, title: 1 }).lean(),
+    MoneyBorrowed.find(openBorrowedMatch).sort({ borrowedDate: 1 }).lean(),
   ]);
 
   const totalSales = money(salesByMethod.reduce((sum, row) => sum + (row.amount || 0), 0));
@@ -400,12 +414,23 @@ async function aggregateIncomeExpenseStatement(auth, { storeId, start, end }) {
   );
   const primeCost = money(foodCost + payroll);
 
+  const openBorrowedTotal = money(openBorrowed.reduce((sum, row) => sum + (row.amount || 0), 0));
+  const openBorrowedItems = openBorrowed.map((row) => ({
+    borrowedFrom: row.borrowedFrom,
+    amount: money(row.amount),
+    borrowedDate: row.borrowedDate,
+    note: row.note || '',
+  }));
+
   return {
     totalSales,
     totalExpenses,
     operatingProfit,
     profitMargin,
     expenseCount: expenses.length,
+    openBorrowedTotal,
+    openBorrowedCount: openBorrowed.length,
+    openBorrowedItems,
     ratios: {
       foodCost: percent(foodCost, totalSales),
       payroll: percent(payroll, totalSales),

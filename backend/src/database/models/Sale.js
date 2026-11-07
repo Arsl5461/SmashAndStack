@@ -28,6 +28,11 @@ const saleSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    category: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     saleDate: { type: Date, required: true, default: Date.now },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
@@ -37,5 +42,6 @@ const saleSchema = new mongoose.Schema(
 saleSchema.index({ organizationId: 1, storeId: 1, saleDate: -1 });
 saleSchema.index({ organizationId: 1, saleDate: -1 });
 saleSchema.index({ storeId: 1, paymentMethod: 1, saleDate: -1 });
+saleSchema.index({ organizationId: 1, category: 1, saleDate: -1 });
 
 module.exports = mongoose.model('Sale', saleSchema);
