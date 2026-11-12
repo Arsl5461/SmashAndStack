@@ -37,6 +37,7 @@ const emptyPaymentLine = (): PaymentLine => ({ method: '', amount: 0 });
 
 const emptyForm = {
   storeId: '',
+  title: '',
   category: '',
   expenseDate: today(),
   payments: [emptyPaymentLine()] as PaymentLine[],
@@ -134,6 +135,7 @@ export default function Expenses() {
     setEditingId(row._id);
     setForm({
       storeId: row.storeId?._id || row.storeId || '',
+      title: row.title || '',
       category: row.category || '',
       expenseDate: toDateInput(row.expenseDate),
       payments: paymentsFromRow(row),
@@ -248,8 +250,8 @@ export default function Expenses() {
               .map((row) => ({ method: row.method, amount: Number(row.amount || 0) }))
               .filter((row) => row.method && row.amount > 0);
 
-            if (!storeId || !form.category || !form.expenseDate) {
-              toast.error('Please fill in store, category, and date');
+            if (!storeId || !form.title.trim() || !form.category || !form.expenseDate) {
+              toast.error('Please fill in store, title, category, and date');
               return;
             }
             if (!payments.length) {
@@ -260,8 +262,8 @@ export default function Expenses() {
             try {
               const payload = new FormData();
               payload.append('storeId', String(storeId));
+              payload.append('title', form.title.trim());
               payload.append('category', form.category);
-              payload.append('title', form.category);
               payload.append('expenseDate', form.expenseDate);
               payload.append('paymentMethods', JSON.stringify(payments));
               if (receipt) payload.append('receipt', receipt);
@@ -294,6 +296,19 @@ export default function Expenses() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <RequiredLabel>Title</RequiredLabel>
+            <input
+              className="soft-input"
+              type="text"
+              placeholder="Expense title"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              required
+              minLength={2}
+            />
           </div>
 
           <div>
