@@ -44,7 +44,7 @@ async function getExpense(auth, id) {
 async function createExpense(auth, payload, receiptUrl = '') {
   const category = await expenseCategoryService.assertActiveCategory(auth, payload.category);
   const payments = await normalizePaymentMethods(auth, payload.paymentMethods);
-  const title = (payload.title || category).trim();
+  const title = String(payload.title || '').trim() || category;
 
   return expenseRepository.create({
     storeId: payload.storeId,
@@ -63,9 +63,13 @@ async function updateExpense(auth, id, payload, receiptUrl) {
   await getExpense(auth, id);
   const update = { ...payload };
 
+  if (payload.title !== undefined) {
+    const nextTitle = String(payload.title || '').trim();
+    if (!nextTitle) throw new ValidationError('Title is required');
+    update.title = nextTitle;
+  }
   if (payload.category) {
     update.category = await expenseCategoryService.assertActiveCategory(auth, payload.category);
-    if (!payload.title) update.title = update.category;
   }
   if (payload.paymentMethods) {
     Object.assign(update, await normalizePaymentMethods(auth, payload.paymentMethods));

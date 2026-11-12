@@ -21,7 +21,7 @@ function parsePaymentMethods(value) {
 const createExpenseSchema = z
   .object({
     storeId: z.string().min(1),
-    title: z.string().min(2).optional(),
+    title: z.string().trim().min(2, 'Title is required'),
     description: z.string().optional(),
     category: z.string().min(1),
     amount: z.coerce.number().positive().optional(),
@@ -42,7 +42,7 @@ const createExpenseSchema = z
 
 const updateExpenseSchema = z.object({
   storeId: z.string().min(1).optional(),
-  title: z.string().min(2).optional(),
+  title: z.string().trim().min(2).optional(),
   description: z.string().optional(),
   category: z.string().min(1).optional(),
   amount: z.coerce.number().positive().optional(),
