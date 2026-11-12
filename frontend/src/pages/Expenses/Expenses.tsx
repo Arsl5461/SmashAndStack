@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Calendar, Plus, Trash2, Upload } from 'lucide-react';
+import { Plus, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchInput } from '../../components/common/SearchInput';
@@ -7,11 +7,13 @@ import { DataTable } from '../../components/common/DataTable';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
+import { DateField } from '../../components/common/DateField';
 import {
   useBulkDeleteExpensesMutation,
   useCreateExpenseMutation,
   useGetExpenseCategoriesQuery,
   useGetExpensesQuery,
+  useUpdateExpenseMutation,
 } from '../../api/expensesApi';
 import { useGetStoresQuery } from '../../api/storesApi';
 import { useGetPaymentMethodsQuery } from '../../api/paymentMethodsApi';
@@ -20,7 +22,7 @@ import { useListParams } from '../../hooks/useListParams';
 import { formatCurrencyExact, formatDate } from '../../utils/cn';
 import { clearZeroOnFocus, parseNumericInput, type NumericField } from '../../utils/numberInput';
 import { Pagination } from '../../components/common/Pagination';
-import { DeleteAction, TableActions, ViewAction } from '../../components/common/TableActions';
+import { DeleteAction, EditAction, TableActions, ViewAction } from '../../components/common/TableActions';
 import { ListingToolbar } from '../../components/common/ListingToolbar';
 import { useRowSelection } from '../../hooks/useRowSelection';
 import type { ExportColumn } from '../../utils/export';
@@ -28,6 +30,8 @@ import type { ExportColumn } from '../../utils/export';
 type PaymentLine = { method: string; amount: NumericField };
 
 const today = () => new Date().toISOString().slice(0, 10);
+
+const toDateInput = (value?: string) => (value ? String(value).slice(0, 10) : today());
 
 const emptyPaymentLine = (): PaymentLine => ({ method: '', amount: 0 });
 
@@ -59,8 +63,19 @@ function paymentLabel(row: any) {
   return row.paymentMethod || '—';
 }
 
+function paymentsFromRow(row: any): PaymentLine[] {
+  if (Array.isArray(row.paymentMethods) && row.paymentMethods.length) {
+    return row.paymentMethods.map((item: any) => ({
+      method: item.method || '',
+      amount: item.amount ?? 0,
+    }));
+  }
+  return [{ method: row.paymentMethod || '', amount: row.amount ?? 0 }];
+}
+
 export default function Expenses() {
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteIds, setDeleteIds] = useState<string[]>([]);
   const [receipt, setReceipt] = useState<File | null>(null);
   const [viewReceipt, setViewReceipt] = useState<{ title: string; url: string } | null>(null);
@@ -85,9 +100,11 @@ export default function Expenses() {
     { header: 'Date', value: (row) => formatDate(row.expenseDate) },
     { header: 'Receipt', value: (row) => (row.receiptUrl ? 'Yes' : 'No') },
   ];
-  const [createExpense] = useCreateExpenseMutation();
+  const [createExpense, { isLoading: creating }] = useCreateExpenseMutation();
+  const [updateExpense, { isLoading: updating }] = useUpdateExpenseMutation();
   const [bulkDeleteExpenses] = useBulkDeleteExpensesMutation();
   const [form, setForm] = useState(emptyForm);
+  const saving = creating || updating;
 
   const expenseTotal = useMemo(
     () => form.payments.reduce((sum, row) => sum + Number(row.amount || 0), 0),
@@ -96,8 +113,33 @@ export default function Expenses() {
 
   const closeModal = () => {
     setOpen(false);
+    setEditingId(null);
     setForm({ ...emptyForm, expenseDate: today(), payments: [emptyPaymentLine()] });
     setReceipt(null);
+  };
+
+  const openCreate = () => {
+    setEditingId(null);
+    setForm({
+      ...emptyForm,
+      storeId: selectedStoreId || '',
+      expenseDate: today(),
+      payments: [emptyPaymentLine()],
+    });
+    setReceipt(null);
+    setOpen(true);
+  };
+
+  const openEdit = (row: any) => {
+    setEditingId(row._id);
+    setForm({
+      storeId: row.storeId?._id || row.storeId || '',
+      category: row.category || '',
+      expenseDate: toDateInput(row.expenseDate),
+      payments: paymentsFromRow(row),
+    });
+    setReceipt(null);
+    setOpen(true);
   };
 
   const updatePayment = (index: number, patch: Partial<PaymentLine>) => {
@@ -113,20 +155,7 @@ export default function Expenses() {
         title="Expenses"
         subtitle="Track operating costs by store, category, and date range."
         actions={
-          <button
-            className="btn-primary"
-            type="button"
-            onClick={() => {
-              setForm({
-                ...emptyForm,
-                storeId: selectedStoreId || '',
-                expenseDate: today(),
-                payments: [emptyPaymentLine()],
-              });
-              setReceipt(null);
-              setOpen(true);
-            }}
-          >
+          <button className="btn-primary" type="button" onClick={openCreate}>
             <Plus className="h-4 w-4" />
             Add Expense
           </button>
@@ -192,6 +221,7 @@ export default function Expenses() {
                           onClick={() => setViewReceipt({ title: row.title, url: receiptPath(row.receiptUrl) })}
                         />
                       ) : null}
+                      <EditAction onClick={() => openEdit(row)} />
                       <DeleteAction onClick={() => setDeleteIds([row._id])} />
                     </TableActions>
                   ),
@@ -205,7 +235,7 @@ export default function Expenses() {
 
       <Modal
         open={open}
-        title="New expense"
+        title={editingId ? 'Edit expense' : 'New expense'}
         description="Split one expense across multiple payment methods if needed."
         onClose={closeModal}
       >
@@ -235,15 +265,21 @@ export default function Expenses() {
               payload.append('expenseDate', form.expenseDate);
               payload.append('paymentMethods', JSON.stringify(payments));
               if (receipt) payload.append('receipt', receipt);
-              await createExpense(payload).unwrap();
-              toast.success('Expense recorded');
+
+              if (editingId) {
+                await updateExpense({ id: editingId, data: payload }).unwrap();
+                toast.success('Expense updated');
+              } else {
+                await createExpense(payload).unwrap();
+                toast.success('Expense recorded');
+              }
               closeModal();
             } catch (error: any) {
               toast.error(error?.data?.message || 'Unable to save expense');
             }
           }}
         >
-          <label className="block">
+          <div>
             <RequiredLabel>Store</RequiredLabel>
             <select
               className="soft-input"
@@ -258,9 +294,9 @@ export default function Expenses() {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label className="block">
+          <div>
             <RequiredLabel>Category</RequiredLabel>
             <select
               className="soft-input"
@@ -275,24 +311,19 @@ export default function Expenses() {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
           {!categories.length ? (
             <p className="text-xs text-slate-500">Add categories from Expense Categories first.</p>
           ) : null}
 
-          <label className="block">
+          <div>
             <RequiredLabel>Date</RequiredLabel>
-            <span className="soft-input flex items-center gap-2">
-              <Calendar className="h-4 w-4 shrink-0 text-brand-red" />
-              <input
-                className="w-full bg-transparent outline-none"
-                type="date"
-                value={form.expenseDate}
-                onChange={(e) => setForm({ ...form, expenseDate: e.target.value })}
-                required
-              />
-            </span>
-          </label>
+            <DateField
+              value={form.expenseDate}
+              onChange={(value) => setForm({ ...form, expenseDate: value })}
+              required
+            />
+          </div>
 
           <div className="space-y-2">
             <RequiredLabel>Payment methods</RequiredLabel>
@@ -362,7 +393,7 @@ export default function Expenses() {
             <span className="text-base font-medium text-ink-900">{formatCurrencyExact(expenseTotal)}</span>
           </div>
 
-          <label className="block">
+          <div>
             <span className="mb-1.5 block text-sm font-medium text-slate-300">Receipt</span>
             <span className="soft-input flex cursor-pointer items-center gap-2">
               <Upload className="h-4 w-4 shrink-0 text-brand-red" />
@@ -373,15 +404,17 @@ export default function Expenses() {
                 onChange={(event) => setReceipt(event.target.files?.[0] || null)}
               />
             </span>
-            <p className="mt-1 text-xs text-slate-500">Optional. JPG, PNG, WEBP, or PDF up to 5 MB.</p>
-          </label>
+            <p className="mt-1 text-xs text-slate-500">
+              {editingId ? 'Optional. Leave empty to keep the current receipt.' : 'Optional. JPG, PNG, WEBP, or PDF up to 5 MB.'}
+            </p>
+          </div>
 
           <div className="flex justify-end gap-2">
             <button className="btn-secondary" type="button" onClick={closeModal}>
               Cancel
             </button>
-            <button className="btn-primary" type="submit" disabled={!categories.length || !paymentMethods.length}>
-              Save
+            <button className="btn-primary" type="submit" disabled={saving || !categories.length || !paymentMethods.length}>
+              {saving ? 'Saving...' : editingId ? 'Update' : 'Save'}
             </button>
           </div>
         </form>

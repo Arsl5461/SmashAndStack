@@ -11,7 +11,7 @@ export const expensesApi = api.injectEndpoints({
       invalidatesTags: ['Expense', 'Dashboard', 'Report'],
     }),
     updateExpense: builder.mutation({
-      query: ({ id, data }: { id: string; data: Record<string, unknown> }) => ({
+      query: ({ id, data }: { id: string; data: FormData | Record<string, unknown> }) => ({
         url: `/expenses/${id}`,
         method: 'PATCH',
         data,

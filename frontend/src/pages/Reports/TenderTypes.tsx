@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FileDown } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { MonthField } from '../../components/common/DateField';
 import { useGetTenderTypesQuery } from '../../api/dashboardApi';
 import { useStoreContext } from '../../hooks/usePermissions';
 import { formatCurrencyExact, formatDate } from '../../utils/cn';
@@ -50,15 +51,7 @@ export default function TenderTypes() {
         subtitle={`Payment totals for ${monthLabel(month)}.`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <label className="flex items-center gap-2 rounded-xl border border-white/10 bg-surface-raised px-3 py-2 text-sm font-medium text-slate-300">
-              Month
-              <input
-                className="bg-transparent outline-none"
-                type="month"
-                value={month}
-                onChange={(event) => setMonth(event.target.value)}
-              />
-            </label>
+            <MonthField value={month} onChange={setMonth} />
             <button className="btn-primary" type="button" disabled={!report} onClick={exportPdf}>
               <FileDown className="h-4 w-4" />
               Export to PDF

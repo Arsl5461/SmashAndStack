@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, CheckCircle2, Plus } from 'lucide-react';
+import { CheckCircle2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchInput } from '../../components/common/SearchInput';
@@ -7,6 +7,7 @@ import { DataTable } from '../../components/common/DataTable';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { BusyOverlay, InlineSpinner, LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
+import { DateField } from '../../components/common/DateField';
 import { Pagination } from '../../components/common/Pagination';
 import { ListingToolbar } from '../../components/common/ListingToolbar';
 import { DeleteAction, EditAction, TableActions } from '../../components/common/TableActions';
@@ -282,19 +283,14 @@ export default function MoneyBorrowed() {
               required
             />
           </label>
-          <label className="block">
+          <div>
             <RequiredLabel>Date</RequiredLabel>
-            <span className="soft-input flex items-center gap-2">
-              <Calendar className="h-4 w-4 shrink-0 text-brand-red" />
-              <input
-                className="w-full bg-transparent outline-none"
-                type="date"
-                value={form.borrowedDate}
-                onChange={(event) => setForm({ ...form, borrowedDate: event.target.value })}
-                required
-              />
-            </span>
-          </label>
+            <DateField
+              value={form.borrowedDate}
+              onChange={(value) => setForm({ ...form, borrowedDate: value })}
+              required
+            />
+          </div>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-slate-300">Note</span>
             <input

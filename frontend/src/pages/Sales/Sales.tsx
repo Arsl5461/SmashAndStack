@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SearchInput } from '../../components/common/SearchInput';
@@ -7,7 +7,13 @@ import { DataTable } from '../../components/common/DataTable';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { BusyOverlay, InlineSpinner, LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { Modal } from '../../components/common/Modal';
-import { useBulkDeleteSalesMutation, useCreateSaleMutation, useGetSalesQuery } from '../../api/salesApi';
+import { DateField } from '../../components/common/DateField';
+import {
+  useBulkDeleteSalesMutation,
+  useCreateSaleMutation,
+  useGetSalesQuery,
+  useUpdateSaleMutation,
+} from '../../api/salesApi';
 import { useGetPaymentMethodsQuery } from '../../api/paymentMethodsApi';
 import { useGetSaleCategoriesQuery } from '../../api/saleCategoriesApi';
 import { useStoreContext } from '../../hooks/usePermissions';
@@ -15,12 +21,13 @@ import { useListParams } from '../../hooks/useListParams';
 import { formatCurrencyExact, formatDate } from '../../utils/cn';
 import { clearZeroOnFocus, parseNumericInput, type NumericField } from '../../utils/numberInput';
 import { Pagination } from '../../components/common/Pagination';
-import { DeleteAction, TableActions, ViewAction } from '../../components/common/TableActions';
+import { DeleteAction, EditAction, TableActions, ViewAction } from '../../components/common/TableActions';
 import { ListingToolbar } from '../../components/common/ListingToolbar';
 import { useRowSelection } from '../../hooks/useRowSelection';
 import type { ExportColumn } from '../../utils/export';
 
 const today = () => new Date().toISOString().slice(0, 10);
+const toDateInput = (value?: string) => (value ? String(value).slice(0, 10) : today());
 
 const emptyForm: {
   storeId: string;
@@ -52,6 +59,7 @@ function attachmentPath(url?: string) {
 
 export default function Sales() {
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteIds, setDeleteIds] = useState<string[]>([]);
   const [attachment, setAttachment] = useState<File | null>(null);
   const [viewAttachment, setViewAttachment] = useState<{ title: string; url: string } | null>(null);
@@ -74,13 +82,40 @@ export default function Sales() {
   const paymentMethods = methodsQuery.data?.data || [];
   const saleCategories = categoriesQuery.data?.data || [];
   const [createSale, { isLoading: creating }] = useCreateSaleMutation();
+  const [updateSale, { isLoading: updating }] = useUpdateSaleMutation();
   const [bulkDeleteSales, { isLoading: deleting }] = useBulkDeleteSalesMutation();
   const [form, setForm] = useState(emptyForm);
+  const saving = creating || updating;
 
   const closeModal = () => {
     setOpen(false);
+    setEditingId(null);
     setForm({ ...emptyForm, saleDate: today() });
     setAttachment(null);
+  };
+
+  const openCreate = () => {
+    setEditingId(null);
+    setForm({
+      ...emptyForm,
+      storeId: selectedStoreId || '',
+      saleDate: today(),
+    });
+    setAttachment(null);
+    setOpen(true);
+  };
+
+  const openEdit = (row: any) => {
+    setEditingId(row._id);
+    setForm({
+      storeId: row.storeId?._id || row.storeId || '',
+      category: row.category || '',
+      saleDate: toDateInput(row.saleDate),
+      amount: row.totalAmount ?? '',
+      paymentMethod: row.paymentMethod || '',
+    });
+    setAttachment(null);
+    setOpen(true);
   };
 
   return (
@@ -89,19 +124,7 @@ export default function Sales() {
         title="Sales Income"
         subtitle="Record and review store-level sales."
         actions={
-          <button
-            className="btn-primary"
-            type="button"
-            onClick={() => {
-              setForm({
-                ...emptyForm,
-                storeId: selectedStoreId || '',
-                saleDate: today(),
-              });
-              setAttachment(null);
-              setOpen(true);
-            }}
-          >
+          <button className="btn-primary" type="button" onClick={openCreate}>
             Add Sale
           </button>
         }
@@ -151,6 +174,7 @@ export default function Sales() {
                           }
                         />
                       ) : null}
+                      <EditAction onClick={() => openEdit(row)} />
                       <DeleteAction onClick={() => setDeleteIds([row._id])} />
                     </TableActions>
                   ),
@@ -164,7 +188,7 @@ export default function Sales() {
 
       <Modal
         open={open}
-        title="New sale"
+        title={editingId ? 'Edit sale' : 'New sale'}
         description="Choose a category from Sale Category, then save the sale."
         onClose={closeModal}
       >
@@ -185,15 +209,21 @@ export default function Sales() {
               payload.append('paymentMethod', form.paymentMethod);
               payload.append('totalAmount', String(form.amount));
               if (attachment) payload.append('attachment', attachment);
-              await createSale(payload).unwrap();
-              toast.success('Sale recorded');
+
+              if (editingId) {
+                await updateSale({ id: editingId, data: payload }).unwrap();
+                toast.success('Sale updated');
+              } else {
+                await createSale(payload).unwrap();
+                toast.success('Sale recorded');
+              }
               closeModal();
             } catch (error: any) {
               toast.error(error?.data?.message || 'Unable to save sale');
             }
           }}
         >
-          <label className="block">
+          <div>
             <RequiredLabel>Store</RequiredLabel>
             <select
               className="soft-input"
@@ -208,8 +238,8 @@ export default function Sales() {
                 </option>
               ))}
             </select>
-          </label>
-          <label className="block">
+          </div>
+          <div>
             <RequiredLabel>Category</RequiredLabel>
             <select
               className="soft-input"
@@ -224,24 +254,19 @@ export default function Sales() {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
           {!saleCategories.length ? (
             <p className="text-xs text-slate-500">Add categories from Sale Category first.</p>
           ) : null}
-          <label className="block">
+          <div>
             <RequiredLabel>Date</RequiredLabel>
-            <span className="soft-input flex items-center gap-2">
-              <Calendar className="h-4 w-4 shrink-0 text-brand-red" />
-              <input
-                className="w-full bg-transparent outline-none"
-                type="date"
-                value={form.saleDate}
-                onChange={(e) => setForm({ ...form, saleDate: e.target.value })}
-                required
-              />
-            </span>
-          </label>
-          <label className="block">
+            <DateField
+              value={form.saleDate}
+              onChange={(value) => setForm({ ...form, saleDate: value })}
+              required
+            />
+          </div>
+          <div>
             <RequiredLabel>Sale amount</RequiredLabel>
             <input
               className="soft-input"
@@ -254,8 +279,8 @@ export default function Sales() {
               onChange={(e) => setForm({ ...form, amount: parseNumericInput(e.target.value) })}
               required
             />
-          </label>
-          <label className="block">
+          </div>
+          <div>
             <RequiredLabel>Payment method</RequiredLabel>
             <select
               className="soft-input"
@@ -270,11 +295,11 @@ export default function Sales() {
                 </option>
               ))}
             </select>
-          </label>
+          </div>
           {!paymentMethods.length ? (
             <p className="text-xs text-slate-500">Add methods from Payment Method first.</p>
           ) : null}
-          <label className="block">
+          <div>
             <span className="mb-1.5 block text-sm font-medium text-slate-300">Attachment</span>
             <span className="soft-input flex cursor-pointer items-center gap-2">
               <Upload className="h-4 w-4 shrink-0 text-brand-red" />
@@ -285,8 +310,12 @@ export default function Sales() {
                 onChange={(event) => setAttachment(event.target.files?.[0] || null)}
               />
             </span>
-            <p className="mt-1 text-xs text-slate-500">Optional. JPG, PNG, WEBP, or PDF up to 5 MB.</p>
-          </label>
+            <p className="mt-1 text-xs text-slate-500">
+              {editingId
+                ? 'Optional. Leave empty to keep the current attachment.'
+                : 'Optional. JPG, PNG, WEBP, or PDF up to 5 MB.'}
+            </p>
+          </div>
           <div className="flex justify-end gap-2">
             <button className="btn-secondary" type="button" onClick={closeModal}>
               Cancel
@@ -294,13 +323,15 @@ export default function Sales() {
             <button
               className="btn-primary"
               type="submit"
-              disabled={creating || !saleCategories.length || !paymentMethods.length}
+              disabled={saving || !saleCategories.length || !paymentMethods.length}
             >
-              {creating ? (
+              {saving ? (
                 <>
                   <InlineSpinner className="border-white/30 border-t-white" />
                   Saving...
                 </>
+              ) : editingId ? (
+                'Update'
               ) : (
                 'Save'
               )}
@@ -342,7 +373,7 @@ export default function Sales() {
         ) : null}
       </Modal>
 
-      <BusyOverlay show={creating || deleting} label={deleting ? 'Deleting sales...' : 'Saving sale...'} />
+      <BusyOverlay show={saving || deleting} label={deleting ? 'Deleting sales...' : 'Saving sale...'} />
       <ConfirmDialog
         open={deleteIds.length > 0}
         title={deleteIds.length > 1 ? 'Delete selected sales' : 'Delete sale'}

@@ -1,4 +1,4 @@
-import { Calendar } from 'lucide-react';
+import { DateField } from './DateField';
 
 export function DateRangePicker({
   startDate,
@@ -11,28 +11,22 @@ export function DateRangePicker({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-surface-raised px-3 py-2">
-        <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
-        <span className="text-xs font-medium text-slate-400">From</span>
-        <input
-          className="bg-transparent text-sm font-medium text-ink-900 outline-none"
-          type="date"
-          value={startDate || ''}
-          max={endDate || undefined}
-          onChange={(event) => onChange({ startDate: event.target.value, endDate })}
-        />
-      </label>
-      <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-surface-raised px-3 py-2">
-        <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
-        <span className="text-xs font-medium text-slate-400">To</span>
-        <input
-          className="bg-transparent text-sm font-medium text-ink-900 outline-none"
-          type="date"
-          value={endDate || ''}
-          min={startDate || undefined}
-          onChange={(event) => onChange({ startDate, endDate: event.target.value })}
-        />
-      </label>
+      <DateField
+        label="From"
+        value={startDate || ''}
+        max={endDate || undefined}
+        onChange={(value) => onChange({ startDate: value, endDate })}
+        className="min-w-[200px] py-2"
+        inputClassName="text-sm font-medium text-ink-900"
+      />
+      <DateField
+        label="To"
+        value={endDate || ''}
+        min={startDate || undefined}
+        onChange={(value) => onChange({ startDate, endDate: value })}
+        className="min-w-[200px] py-2"
+        inputClassName="text-sm font-medium text-ink-900"
+      />
     </div>
   );
 }
